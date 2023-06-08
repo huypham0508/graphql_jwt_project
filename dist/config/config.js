@@ -1,0 +1,26 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ConfigBcrypt = exports.ConfigJWT = exports.ConfigServer = exports.ConfigMongo = void 0;
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+class ConfigMongo {
+}
+exports.ConfigMongo = ConfigMongo;
+ConfigMongo.URI_DATABASE = process.env.CONNECT_MONGO_DB;
+class ConfigServer {
+}
+exports.ConfigServer = ConfigServer;
+ConfigServer.PORT = process.env.PORT || 4000;
+class ConfigJWT {
+}
+exports.ConfigJWT = ConfigJWT;
+ConfigJWT.JWT_ACCESS_PRIVATE_KEY = process.env.JWT_ACCESS_PRIVATE_KEY;
+ConfigJWT.JWT_REFRESH_PRIVATE_KEY = process.env.JWT_REFRESH_PRIVATE_KEY;
+class ConfigBcrypt {
+}
+exports.ConfigBcrypt = ConfigBcrypt;
+ConfigBcrypt.saltRounds = 10;
+//# sourceMappingURL=config.js.map

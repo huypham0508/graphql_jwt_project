@@ -1,0 +1,48 @@
+import mongoose from "mongoose";
+import { Field, ObjectType } from "type-graphql";
+const Schema = mongoose.Schema;
+const model = mongoose.model;
+
+@ObjectType()
+export class IUser {
+    // @Field(_type => ID)
+    id: any;
+
+    @Field()
+    userName: string;
+
+    @Field()
+    email: string;
+
+    @Field({ nullable: true })
+    avatar?: string;
+    password: string;
+    token?: string;
+}
+
+export const UserSchema = new Schema<IUser>({
+    id: {
+        type: String,
+    },
+    email: {
+        type: String,
+        require: true
+    },
+    userName: {
+        type: String,
+        require: true
+    },
+    password: {
+        type: String,
+        require: true
+    },
+    token: {
+        type: String,
+        // require: true
+    }
+},
+    { timestamps: true }
+)
+
+const User = model<IUser>('users', UserSchema)
+export default User;
