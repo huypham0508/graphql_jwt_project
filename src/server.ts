@@ -1,19 +1,15 @@
 import 'reflect-metadata'
-import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import {
     ApolloServerPluginDrainHttpServer,
     // ApolloServerPluginLandingPageGraphQLPlayground
 } from "apollo-server-core";
 import cors from 'cors';
-import connectDB from './utils/connectDB';
-import { createServer } from 'http';
+import connectDB from './app/utils/connectDB';
 import { buildSchema } from 'type-graphql';
-import { ConfigServer } from './config/config';
-import { GreetingResolver, UserResolver } from './resolvers/index';
-
-const app = express()
-const httpServer = createServer(app);
+import { ConfigServer } from './app/config/config';
+import { GreetingResolver, UserResolver } from './app/resolvers/index';
+import { app, httpServer } from './app/app';
 
 
 const main = async () => {
@@ -40,5 +36,4 @@ const main = async () => {
 };
 
 main().catch(error => console.log("ERROR STARTING SERVER: ", error));
-
-//1h42p
+//3h44p55s

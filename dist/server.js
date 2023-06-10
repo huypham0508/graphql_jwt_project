@@ -4,17 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
-const express_1 = __importDefault(require("express"));
 const apollo_server_express_1 = require("apollo-server-express");
 const apollo_server_core_1 = require("apollo-server-core");
 const cors_1 = __importDefault(require("cors"));
-const connectDB_1 = __importDefault(require("./utils/connectDB"));
-const http_1 = require("http");
+const connectDB_1 = __importDefault(require("./app/utils/connectDB"));
 const type_graphql_1 = require("type-graphql");
-const config_1 = require("./config/config");
-const index_1 = require("./resolvers/index");
-const app = (0, express_1.default)();
-const httpServer = (0, http_1.createServer)(app);
+const config_1 = require("./app/config/config");
+const index_1 = require("./app/resolvers/index");
+const app_1 = require("./app/app");
 const main = async () => {
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: await (0, type_graphql_1.buildSchema)({
@@ -22,17 +19,17 @@ const main = async () => {
             resolvers: [index_1.GreetingResolver, index_1.UserResolver]
         }),
         plugins: [
-            (0, apollo_server_core_1.ApolloServerPluginDrainHttpServer)({ httpServer }),
+            (0, apollo_server_core_1.ApolloServerPluginDrainHttpServer)({ httpServer: app_1.httpServer }),
         ],
         context: ({ req, res }) => {
             return ({ req, res });
         }
     });
-    await app.use((0, cors_1.default)());
+    await app_1.app.use((0, cors_1.default)());
     await (0, connectDB_1.default)();
     await apolloServer.start();
-    await apolloServer.applyMiddleware({ app });
-    httpServer.listen({ port: config_1.ConfigServer.PORT }, async () => {
+    await apolloServer.applyMiddleware({ app: app_1.app });
+    app_1.httpServer.listen({ port: config_1.ConfigServer.PORT }, async () => {
         console.log(`Server ready at http://localhost:${config_1.ConfigServer.PORT}${apolloServer.graphqlPath}`);
     });
 };

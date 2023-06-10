@@ -21,7 +21,7 @@ ConfigJWT.create_token_type = "createToken";
 ConfigJWT.refresh_token_type = "refreshToken";
 ConfigJWT.JWT_ACCESS_PRIVATE_KEY = process.env.JWT_ACCESS_PRIVATE_KEY;
 ConfigJWT.JWT_REFRESH_PRIVATE_KEY = process.env.JWT_REFRESH_PRIVATE_KEY;
-ConfigJWT.REFRESH_TOKEN_COOKI_NAME = process.env.REFRESH_TOKEN_COOKI_NAME;
+ConfigJWT.REFRESH_TOKEN_COOKIE_NAME = process.env.REFRESH_TOKEN_COOKI_NAME;
 class ConfigBcrypt {
 }
 exports.ConfigBcrypt = ConfigBcrypt;

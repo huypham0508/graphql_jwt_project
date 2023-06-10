@@ -22,6 +22,7 @@ const type_graphql_1 = require("type-graphql");
 let GreetingResolver = exports.GreetingResolver = class GreetingResolver {
     async hello(context) {
         var _a;
+        console.log("hello user");
         const id = context.user.id;
         const data = await User_1.default.findOne({
             _id: id

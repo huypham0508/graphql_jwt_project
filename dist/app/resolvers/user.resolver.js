@@ -50,6 +50,7 @@ let UserResolver = exports.UserResolver = class UserResolver {
         return data;
     }
     async register(registerInput) {
+        console.log("register is working...");
         const { email, userName, password } = registerInput;
         const existingUser = await User_1.default.findOne({
             email
@@ -66,6 +67,7 @@ let UserResolver = exports.UserResolver = class UserResolver {
             email,
             userName,
             password: hashedPassword,
+            tokenVersion: 0,
         });
         await newUser.save();
         return {
@@ -75,6 +77,8 @@ let UserResolver = exports.UserResolver = class UserResolver {
         };
     }
     async login({ email, password }, { res }) {
+        var _a;
+        console.log("login is working...");
         let hashPassword = "";
         const checkAccount = await User_1.default.findOne({
             email
@@ -95,23 +99,58 @@ let UserResolver = exports.UserResolver = class UserResolver {
                 message: "Password error!!!",
             };
         }
-        auth_1.Auth.sendRefreshToken(res, checkAccount);
+        auth_1.Auth.sendRefreshToken(res, {
+            id: checkAccount._id,
+            email: checkAccount.email,
+            userName: checkAccount.userName,
+            tokenVersion: checkAccount.tokenVersion,
+            password: "checkAccount.password",
+        });
+        const userModel = {
+            id: checkAccount._id,
+            email: checkAccount.email,
+            userName: checkAccount.userName,
+            password: "checkAccount.password",
+        };
         return {
             code: 200,
             success: true,
             message: "Logged in successfully!!!",
-            accessToken: auth_1.Auth.createToken(config_1.ConfigJWT.create_token_type, {
-                id: checkAccount._id,
-                email: checkAccount.email,
-                userName: checkAccount.userName,
-                password: "checkAccount.password",
-            }),
+            accessToken: (_a = auth_1.Auth.createToken(config_1.ConfigJWT.create_token_type, userModel)) !== null && _a !== void 0 ? _a : "",
             user: {
                 id: checkAccount._id,
                 email: checkAccount.email,
                 userName: checkAccount.userName,
                 password: "checkAccount.password",
             },
+        };
+    }
+    async logout(id, { res }) {
+        console.log("logout is working...");
+        const existingUser = await User_1.default.findOne({
+            _id: id
+        });
+        if (!existingUser) {
+            return {
+                code: 401,
+                success: true,
+                message: "Error !!!",
+            };
+        }
+        const versionPlus = existingUser.tokenVersion !== undefined ? existingUser.tokenVersion + 1 : 0;
+        existingUser.tokenVersion = await versionPlus;
+        existingUser.token = await "";
+        await existingUser.save();
+        await res.clearCookie(config_1.ConfigJWT.REFRESH_TOKEN_COOKIE_NAME, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax',
+            path: '/refresh_token',
+        });
+        return {
+            code: 200,
+            success: true,
+            message: "Logged out successfully!!!",
         };
     }
 };
@@ -137,7 +176,15 @@ __decorate([
     __metadata("design:paramtypes", [LoginInput_1.LoginInput, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "login", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(_return => UserMutationResponse_1.UserMutationResponse),
+    __param(0, (0, type_graphql_1.Arg)("id", _type => type_graphql_1.ID)),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "logout", null);
 exports.UserResolver = UserResolver = __decorate([
     (0, type_graphql_1.Resolver)()
 ], UserResolver);
-//# sourceMappingURL=user.js.map
+//# sourceMappingURL=user.resolver.js.map
