@@ -25,10 +25,10 @@ const main = async () => {
             return ({ req, res });
         }
     });
-    await app_1.app.use((0, cors_1.default)());
+    app_1.app.use((0, cors_1.default)());
     await (0, connectDB_1.default)();
     await apolloServer.start();
-    await apolloServer.applyMiddleware({ app: app_1.app });
+    apolloServer.applyMiddleware({ app: app_1.app });
     app_1.httpServer.listen({ port: config_1.ConfigServer.PORT }, async () => {
         console.log(`Server ready at http://localhost:${config_1.ConfigServer.PORT}${apolloServer.graphqlPath}`);
     });

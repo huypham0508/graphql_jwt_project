@@ -26,14 +26,13 @@ const main = async () => {
             return ({ req, res })
         }
     });
-    await app.use(cors());
+    app.use(cors());
     await connectDB();
     await apolloServer.start();
-    await apolloServer.applyMiddleware({ app });
+    apolloServer.applyMiddleware({ app });
     httpServer.listen({ port: ConfigServer.PORT }, async () => {
         console.log(`Server ready at http://localhost:${ConfigServer.PORT}${apolloServer.graphqlPath}`);
     });
 };
 
 main().catch(error => console.log("ERROR STARTING SERVER: ", error));
-//3h44p55s

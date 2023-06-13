@@ -1,8 +1,9 @@
 // import mongoose from "mongoose";
 import User from "../models/User";
+import lang from '../../../language/language.json';
 import { Context } from "../types/Context";
 import { Auth } from "../middleware/auth";
-import { Ctx, Query, Resolver, UseMiddleware } from "type-graphql";
+import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
 
 
 @Resolver()
@@ -20,5 +21,24 @@ export class GreetingResolver {
             return `data not found`;
         }
         return `hello ${data.userName ?? "world"}`;
+    }
+    @Mutation(_return => String)
+    async getLang(
+        @Arg("langType") langType: String,
+    ): Promise<string> {
+        console.log(langType);
+        let getLang;
+        switch (langType) {
+            case "en":
+                getLang = lang["en"]
+                break;
+            case "vi":
+                getLang = lang["vi"]
+                break;
+            default:
+                getLang = lang;
+                break;
+        }
+        return JSON.stringify(getLang);
     }
 }
