@@ -16,14 +16,14 @@ const main = async () => {
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: await (0, type_graphql_1.buildSchema)({
             validate: false,
-            resolvers: [index_1.GreetingResolver, index_1.UserResolver]
+            resolvers: [index_1.GreetingResolver, index_1.UserResolver],
         }),
         plugins: [
             (0, apollo_server_core_1.ApolloServerPluginDrainHttpServer)({ httpServer: app_1.httpServer }),
         ],
         context: ({ req, res }) => {
-            return ({ req, res });
-        }
+            return { req, res };
+        },
     });
     app_1.app.use((0, cors_1.default)());
     await (0, connectDB_1.default)();
@@ -33,5 +33,5 @@ const main = async () => {
         console.log(`Server ready at http://localhost:${config_1.ConfigServer.PORT}${apolloServer.graphqlPath}`);
     });
 };
-main().catch(error => console.log("ERROR STARTING SERVER: ", error));
+main().catch((error) => console.log("ERROR STARTING SERVER: ", error));
 //# sourceMappingURL=server.js.map

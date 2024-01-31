@@ -16,17 +16,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GreetingResolver = void 0;
-const User_1 = __importDefault(require("../models/User"));
+const User_1 = __importDefault(require("../models/user/User"));
 const language_json_1 = __importDefault(require("../../../language/language.json"));
 const auth_1 = require("../middleware/auth");
 const type_graphql_1 = require("type-graphql");
 let GreetingResolver = exports.GreetingResolver = class GreetingResolver {
     async hello(context) {
         var _a;
-        console.log("hello user");
         const id = context.user.id;
         const data = await User_1.default.findOne({
-            _id: id
+            _id: id,
         });
         if (!data) {
             return `data not found`;
@@ -51,7 +50,7 @@ let GreetingResolver = exports.GreetingResolver = class GreetingResolver {
     }
 };
 __decorate([
-    (0, type_graphql_1.Query)(_return => String),
+    (0, type_graphql_1.Query)((_return) => String),
     (0, type_graphql_1.UseMiddleware)(auth_1.Auth.verifyToken),
     __param(0, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
@@ -59,7 +58,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], GreetingResolver.prototype, "hello", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(_return => String),
+    (0, type_graphql_1.Mutation)((_return) => String),
     __param(0, (0, type_graphql_1.Arg)("langType")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

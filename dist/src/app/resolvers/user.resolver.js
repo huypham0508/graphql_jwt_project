@@ -36,11 +36,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserResolver = void 0;
-const User_1 = __importStar(require("../models/User"));
-const RegisterInput_1 = require("../types/RegisterInput");
+const User_1 = __importStar(require("../models/user/User"));
+const RegisterInput_1 = require("../types/input/user/RegisterInput");
 const type_graphql_1 = require("type-graphql");
-const UserMutationResponse_1 = require("../types/UserMutationResponse");
-const LoginInput_1 = require("../types/LoginInput");
+const UserMutationResponse_1 = require("../types/response/user/UserMutationResponse");
+const LoginInput_1 = require("../types/input/user/LoginInput");
 const index_1 = require("../bcrypt/index");
 const auth_1 = require("../middleware/auth");
 const config_1 = require("../config/config");
@@ -53,7 +53,7 @@ let UserResolver = exports.UserResolver = class UserResolver {
         console.log("register is working...");
         const { email, userName, password } = registerInput;
         const existingUser = await User_1.default.findOne({
-            email
+            email,
         });
         if (existingUser) {
             return {
@@ -81,7 +81,7 @@ let UserResolver = exports.UserResolver = class UserResolver {
         console.log("login is working...");
         let hashPassword = "";
         const checkAccount = await User_1.default.findOne({
-            email
+            email,
         });
         if (!checkAccount) {
             return {
@@ -128,7 +128,7 @@ let UserResolver = exports.UserResolver = class UserResolver {
     async logout(id, { res }) {
         console.log("logout is working...");
         const existingUser = await User_1.default.findOne({
-            _id: id
+            _id: id,
         });
         if (!existingUser) {
             return {
@@ -137,15 +137,17 @@ let UserResolver = exports.UserResolver = class UserResolver {
                 message: "Error !!!",
             };
         }
-        const versionPlus = existingUser.tokenVersion !== undefined ? existingUser.tokenVersion + 1 : 0;
+        const versionPlus = existingUser.tokenVersion !== undefined
+            ? existingUser.tokenVersion + 1
+            : 0;
         existingUser.tokenVersion = await versionPlus;
         existingUser.token = await "";
         await existingUser.save();
         await res.clearCookie(config_1.ConfigJWT.REFRESH_TOKEN_COOKIE_NAME, {
             httpOnly: true,
             secure: true,
-            sameSite: 'lax',
-            path: '/refresh_token',
+            sameSite: "lax",
+            path: "/refresh_token",
         });
         return {
             code: 200,
@@ -155,30 +157,30 @@ let UserResolver = exports.UserResolver = class UserResolver {
     }
 };
 __decorate([
-    (0, type_graphql_1.Query)(_return => [User_1.IUser]),
+    (0, type_graphql_1.Query)((_return) => [User_1.IUser]),
     (0, type_graphql_1.UseMiddleware)(auth_1.Auth.verifyToken),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "getUser", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(_return => UserMutationResponse_1.UserMutationResponse),
-    __param(0, (0, type_graphql_1.Arg)('registerInput')),
+    (0, type_graphql_1.Mutation)((_return) => UserMutationResponse_1.UserMutationResponse),
+    __param(0, (0, type_graphql_1.Arg)("registerInput")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [RegisterInput_1.RegisterInput]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "register", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(_return => UserMutationResponse_1.UserMutationResponse),
-    __param(0, (0, type_graphql_1.Arg)('loginInput')),
+    (0, type_graphql_1.Mutation)((_return) => UserMutationResponse_1.UserMutationResponse),
+    __param(0, (0, type_graphql_1.Arg)("loginInput")),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [LoginInput_1.LoginInput, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "login", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(_return => UserMutationResponse_1.UserMutationResponse),
-    __param(0, (0, type_graphql_1.Arg)("id", _type => type_graphql_1.ID)),
+    (0, type_graphql_1.Mutation)((_return) => UserMutationResponse_1.UserMutationResponse),
+    __param(0, (0, type_graphql_1.Arg)("id", (_type) => type_graphql_1.ID)),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
