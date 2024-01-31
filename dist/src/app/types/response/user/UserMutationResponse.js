@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserMutationResponse = void 0;
 const type_graphql_1 = require("type-graphql");
-const User_1 = require("../models/User");
+const User_1 = require("../../../models/user/User");
 const MutationResponse_1 = require("./MutationResponse");
 let UserMutationResponse = exports.UserMutationResponse = class UserMutationResponse {
 };
