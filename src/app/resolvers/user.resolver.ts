@@ -72,7 +72,7 @@ export class UserResolver {
       return {
         code: 400,
         success: false,
-        message: "Emaill error!!!",
+        message: "Email error!!!",
       };
     }
     //check password
@@ -90,14 +90,14 @@ export class UserResolver {
       email: checkAccount.email,
       userName: checkAccount.userName,
       tokenVersion: checkAccount.tokenVersion,
-      password: "checkAccount.password",
+      password: "",
     });
     const userModel: IUser = {
       id: checkAccount._id,
       email: checkAccount.email,
       userName: checkAccount.userName,
       // tokenVersion: checkAccount.tokenVersion,
-      password: "checkAccount.password",
+      password: "",
     };
     return {
       code: 200,
