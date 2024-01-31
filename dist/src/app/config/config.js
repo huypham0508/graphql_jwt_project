@@ -9,7 +9,7 @@ dotenv_1.default.config();
 class ConfigMongo {
 }
 exports.ConfigMongo = ConfigMongo;
-ConfigMongo.URI_DATABASE = process.env.CONNECT_MONGO_DB;
+ConfigMongo.URI_DATABASE = "mongodb+srv://admin2:oORArVKaZaSxgjfb@cluster0.37vmswz.mongodb.net/?retryWrites=true&w=majority";
 class ConfigServer {
 }
 exports.ConfigServer = ConfigServer;
@@ -19,9 +19,9 @@ class ConfigJWT {
 exports.ConfigJWT = ConfigJWT;
 ConfigJWT.create_token_type = "createToken";
 ConfigJWT.refresh_token_type = "refreshToken";
-ConfigJWT.JWT_ACCESS_PRIVATE_KEY = process.env.JWT_ACCESS_PRIVATE_KEY;
-ConfigJWT.JWT_REFRESH_PRIVATE_KEY = process.env.JWT_REFRESH_PRIVATE_KEY;
-ConfigJWT.REFRESH_TOKEN_COOKIE_NAME = process.env.REFRESH_TOKEN_COOKI_NAME;
+ConfigJWT.JWT_ACCESS_PRIVATE_KEY = "process.env.JWT_ACCESS_PRIVATE_KEY";
+ConfigJWT.JWT_REFRESH_PRIVATE_KEY = "process.env.JWT_REFRESH_PRIVATE_KEY";
+ConfigJWT.REFRESH_TOKEN_COOKIE_NAME = "process.env.REFRESH_TOKEN_COOKI_NAME";
 class ConfigBcrypt {
 }
 exports.ConfigBcrypt = ConfigBcrypt;

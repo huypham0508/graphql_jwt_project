@@ -46,3 +46,9 @@ Trong dự án này, chúng ta có một số lệnh scripts được định ng
 - `graphql`: GraphQL là một ngôn ngữ truy vấn dành cho API và một runtime cho thực thi các truy vấn với dữ liệu có tự mô tả. Nó cho phép các khách hàng yêu cầu chỉ các dữ liệu mà họ cần và không gì nhiều hơn.
 - `mongoose`: Mongoose là một thư viện ODM (Object Data Modeling) cho Node.js và MongoDB. Nó cho phép bạn định nghĩa các mô hình dữ liệu và tương tác với cơ sở dữ liệu MongoDB
 - `apollo-server`: Apollo Server là một thư viện mã nguồn mở được sử dụng để xây dựng các GraphQL server trong các ứng dụng Node.js. Nó cung cấp các tính năng như truy vấn, mutation, và subscription, cũng như các công cụ để phân tích và thực thi truy vấn GraphQL.
+
+# Chạy source với Docker
+
+```shell
+docker run -d --name nodejs_graphql_container -p 4000:4000 manhhy/nodejs_graphql:0.1
+```

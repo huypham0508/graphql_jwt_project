@@ -1,4 +1,4 @@
-FROM node:lts-alpine
+FROM node:20.10.0
 
 WORKDIR /app_node_with_graphql
 
@@ -12,4 +12,4 @@ RUN npm run build
 
 EXPOSE 4000
 
-CMD ["node", "./dist/src/server.js"]
+CMD ["npm", "run", "production"]
