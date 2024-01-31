@@ -41,7 +41,7 @@ refreshToken.get("/", async (req, res): Promise<any> => {
       id: existingUser._id,
       email: existingUser.email,
       userName: existingUser.userName,
-      password: "existingUser.password",
+      password: "",
     });
     return res.status(200).json({
       success: true,
@@ -50,7 +50,7 @@ refreshToken.get("/", async (req, res): Promise<any> => {
         id: existingUser._id,
         email: existingUser.email,
         userName: existingUser.userName,
-        password: "existingUser.password",
+        password: "",
       }),
     });
   } catch (error) {
