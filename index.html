@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <style>
+      .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+    <div class="container">
+      <button id="button">getToken</button>
+    </div>
+    <script>
+      const button = document.getElementById("button");
+      const API_URL = "http://localhost:4000/graphql";
+      let TOKEN = "";
+      const QUERY = `
+            mutation Mutation($loginInput: LoginInput!) {
+                login(loginInput: $loginInput) {
+                    accessToken
+                    success
+                    message
+                    user {
+                    id
+                    }
+                }
+            }
+        `;
+      const VARIABLES = {
+        loginInput: {
+          email: "k8@gmail.com",
+          password: "123123",
+        },
+      };
+
+      async function fetchGraphQLData() {
+        try {
+          const options = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: QUERY, variables: VARIABLES }),
+          };
+
+          const response = await fetch(API_URL, options);
+
+          if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          if (data.errors) {
+            throw new Error(
+              `GraphQL API returned errors: ${JSON.stringify(data.errors)}`
+            );
+          }
+
+          console.log("Success:", data.data);
+          TOKEN = data.data?.login?.accessToken;
+          // Process the data from `data.data` here
+          // const user = data.data.user;
+          // const posts = user.posts;
+
+          // You can now use the fetched data (user and posts)
+        } catch (error) {
+          console.error("Error:", error);
+          // Handle errors appropriately, e.g., display error messages to the user
+        }
+      }
+
+      const getToken = () => {
+        fetch("http://localhost:4000/refreshToken", {
+          method: "GET",
+          headers: {
+            Authorization: TOKEN, // Add your authorization header here
+            "Content-Type": "application/json", // Include if required by the API
+            // ...other necessary headers
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // Process the fetched data here
+            console.log(data);
+          })
+          .catch((error) => {
+            // Handle errors
+            console.error(error);
+          });
+      };
+      button.addEventListener("click", () => getToken());
+      fetchGraphQLData();
+    </script>
+  </body>
+</html>

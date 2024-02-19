@@ -10,12 +10,13 @@ import { buildSchema } from "type-graphql";
 import { ConfigServer } from "./app/config/config";
 import { GreetingResolver, UserResolver } from "./app/resolvers/index";
 import { app, httpServer } from "./app/app";
+import { PostResolver } from "./app/resolvers/post.resolver";
 
 const main = async () => {
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       validate: false,
-      resolvers: [GreetingResolver, UserResolver],
+      resolvers: [GreetingResolver, UserResolver, PostResolver],
     }),
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),

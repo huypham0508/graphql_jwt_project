@@ -11,6 +11,8 @@ refreshToken.get("/", async (req, res): Promise<any> => {
   console.log("sending refresh token...");
   const nameCookie = ConfigJWT.REFRESH_TOKEN_COOKIE_NAME;
   const refreshToken = await req.cookies[nameCookie];
+  console.log({ refreshToken });
+
   if (!refreshToken) {
     return res.status(403).json({
       success: false,

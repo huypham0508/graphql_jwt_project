@@ -25,18 +25,20 @@ export class Auth {
       .catch(() => {
         return (token = "");
       });
-    return token;
+    return token ?? "";
   };
   public static sendRefreshToken = (res: Response, user: IUser) => {
     console.log("sending refresh token...");
 
     const token = Auth.createToken(ConfigJWT.refresh_token_type, user);
-    res.cookie(ConfigJWT.REFRESH_TOKEN_COOKIE_NAME, token, {
+
+    res.cookie(ConfigJWT.REFRESH_TOKEN_COOKIE_NAME as string, token, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
-      path: "/refresh_token",
+      path: "refreshToken",
     });
+    return token;
   };
   public static verifyToken: MiddlewareFn<Context> = ({ context }, next) => {
     console.log("verifying token...");
@@ -53,7 +55,7 @@ export class Auth {
       })
         .then((data) => {
           if (!data) {
-            throw new AuthenticationError("token not found123");
+            throw new AuthenticationError("token not found");
           }
           const decodedToken = verify(
             assetToken,
@@ -66,7 +68,7 @@ export class Auth {
           return next();
         })
         .catch(() => {
-          throw new AuthenticationError("token not found12");
+          throw new AuthenticationError("token not found");
         });
     } catch (error) {
       throw new AuthenticationError("Error while verifying token", error);

@@ -19,11 +19,12 @@ import { ConfigJWT } from "../config/config";
 @Resolver()
 export class UserResolver {
   @Query((_return) => [IUser])
-  @UseMiddleware(Auth.verifyToken)
   async getUser(): Promise<IUser[]> {
     const data = await User.find();
+
     return data;
   }
+  @UseMiddleware(Auth.verifyToken)
   @Mutation((_return) => UserMutationResponse)
   async register(
     @Arg("registerInput")
@@ -85,7 +86,7 @@ export class UserResolver {
         message: "Password error!!!",
       };
     }
-    Auth.sendRefreshToken(res, {
+    const refreshToken = Auth.sendRefreshToken(res, {
       id: checkAccount._id,
       email: checkAccount.email,
       userName: checkAccount.userName,
@@ -103,14 +104,14 @@ export class UserResolver {
       code: 200,
       success: true,
       message: "Logged in successfully!!!",
-      accessToken:
-        Auth.createToken(ConfigJWT.create_token_type, userModel) ?? "",
+      accessToken: Auth.createToken(ConfigJWT.create_token_type, userModel),
+      refreshToken: refreshToken ?? "",
       user: {
         id: checkAccount._id,
         email: checkAccount.email,
         userName: checkAccount.userName,
-        // tokenVersion: checkAccount.tokenVersion,
         password: "checkAccount.password",
+        // tokenVersion: checkAccount.tokenVersion,
       },
     };
   }

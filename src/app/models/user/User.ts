@@ -5,48 +5,46 @@ const model = mongoose.model;
 
 @ObjectType()
 export class IUser {
-    @Field(_type => ID)
-    id: any;
+  @Field((_type) => ID)
+  id: any;
 
-    @Field()
-    userName: string;
+  @Field()
+  userName: string;
 
-    @Field()
-    email: string;
+  @Field()
+  email: string;
 
-    @Field({ nullable: true })
-    avatar?: string;
-    password: string;
-    token?: string;
-    tokenVersion?: number;
+  @Field({ nullable: true })
+  avatar?: string;
+  password: string;
+  token?: string;
+  tokenVersion?: number;
 }
 
-export const UserSchema = new Schema<IUser>({
-    id: {
-        type: String,
-    },
+export const UserSchema = new Schema<IUser>(
+  {
     email: {
-        type: String,
-        require: true
+      type: String,
+      require: true,
     },
     userName: {
-        type: String,
-        require: true
+      type: String,
+      require: true,
     },
     password: {
-        type: String,
-        require: true
+      type: String,
+      require: true,
     },
     token: {
-        type: String,
+      type: String,
     },
     tokenVersion: {
-        type: Number,
-        require: true
-    }
-},
-    { timestamps: true }
-)
+      type: Number,
+      require: true,
+    },
+  },
+  { timestamps: true }
+);
 
-const User = model<IUser>('users', UserSchema)
+const User = model<IUser>("users", UserSchema);
 export default User;
