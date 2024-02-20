@@ -32,7 +32,7 @@ export class Auth {
 
     const token = Auth.createToken(ConfigJWT.refresh_token_type, user);
 
-    res.cookie(ConfigJWT.REFRESH_TOKEN_COOKIE_NAME as string, token, {
+    res.cookie(ConfigJWT.REFRESH_TOKEN_COOKIE_NAME, token, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",

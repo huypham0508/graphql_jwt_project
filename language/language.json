@@ -4,5 +4,12 @@
   },
   "vi": {
     "name": "Nguyễn"
+  },
+  "test": {
+    "access_token": "ya29.a0AfB_byD181k9wGAtHDJrgzVPvyLr9GwUYvo9b4JyLtTuytpMF4aOSp8eEKyRbisTIeMiNnl1T3xdZVs8Zz-GhwFt8B4IRzGKUUKADOBD7wL22GhUKKGoxfEu4kiNTkbbXi9XmT39Ld2i1FgoUSyNpZ0Zo578nzigkLJOaCgYKASISARASFQHGX2MiIqzjJC7y3wMdKCDUxyGiWg0171",
+    "scope": "https://mail.google.com/",
+    "token_type": "Bearer",
+    "expires_in": 3599,
+    "refresh_token": "1//04jr3ETWy-FEUCgYIARAAGAQSNwF-L9IrxK-IHHC-gCQ6U7Q9ma22L79Tjs0UhPC818FyxiBh-K_l2WLy6_kTsgTXLWofklxWDVw"
   }
 }

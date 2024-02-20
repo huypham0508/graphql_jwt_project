@@ -18,6 +18,8 @@ export class IUser {
   avatar?: string;
   password: string;
   token?: string;
+  otp?: string;
+  otpExpirationTime?: number;
   tokenVersion?: number;
 }
 
@@ -37,6 +39,12 @@ export const UserSchema = new Schema<IUser>(
     },
     token: {
       type: String,
+    },
+    otp: {
+      type: String,
+    },
+    otpExpirationTime: {
+      type: Number,
     },
     tokenVersion: {
       type: Number,

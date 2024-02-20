@@ -1,8 +1,4 @@
 import { GreetingResolver } from "./greeting.resolver";
-import { UserResolver } from "./user.resolver";
+import { AuthResolver } from "./auth.resolver";
 
-
-export {
-    UserResolver,
-    GreetingResolver
-}
+export { AuthResolver, GreetingResolver };
