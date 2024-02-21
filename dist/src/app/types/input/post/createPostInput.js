@@ -9,25 +9,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserMutationResponse = void 0;
+exports.CreatePostInput = void 0;
 const type_graphql_1 = require("type-graphql");
-const User_1 = require("../../../models/user/User");
-const MutationResponse_1 = require("../MutationResponse");
-let UserMutationResponse = exports.UserMutationResponse = class UserMutationResponse {
+let CreatePostInput = exports.CreatePostInput = class CreatePostInput {
 };
 __decorate([
-    (0, type_graphql_1.Field)({ nullable: true }),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
-], UserMutationResponse.prototype, "accessToken", void 0);
+], CreatePostInput.prototype, "imageUrl", void 0);
 __decorate([
-    (0, type_graphql_1.Field)({ nullable: true }),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
-], UserMutationResponse.prototype, "refreshToken", void 0);
-__decorate([
-    (0, type_graphql_1.Field)({ nullable: true }),
-    __metadata("design:type", User_1.IUser)
-], UserMutationResponse.prototype, "user", void 0);
-exports.UserMutationResponse = UserMutationResponse = __decorate([
-    (0, type_graphql_1.ObjectType)({ implements: MutationResponse_1.IMutationResponse })
-], UserMutationResponse);
-//# sourceMappingURL=UserMutationResponse.js.map
+], CreatePostInput.prototype, "description", void 0);
+exports.CreatePostInput = CreatePostInput = __decorate([
+    (0, type_graphql_1.InputType)()
+], CreatePostInput);
+//# sourceMappingURL=createPostInput.js.map

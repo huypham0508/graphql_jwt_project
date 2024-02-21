@@ -13,6 +13,7 @@ refreshToken.get("/", async (req, res) => {
     console.log("sending refresh token...");
     const nameCookie = config_1.ConfigJWT.REFRESH_TOKEN_COOKIE_NAME;
     const refreshToken = await req.cookies[nameCookie];
+    console.log({ refreshToken });
     if (!refreshToken) {
         return res.status(403).json({
             success: false,
@@ -40,7 +41,7 @@ refreshToken.get("/", async (req, res) => {
             id: existingUser._id,
             email: existingUser.email,
             userName: existingUser.userName,
-            password: "existingUser.password",
+            password: "",
         });
         return res.status(200).json({
             success: true,
@@ -49,7 +50,7 @@ refreshToken.get("/", async (req, res) => {
                 id: existingUser._id,
                 email: existingUser.email,
                 userName: existingUser.userName,
-                password: "existingUser.password",
+                password: "",
             }),
         });
     }

@@ -12,11 +12,12 @@ const type_graphql_1 = require("type-graphql");
 const config_1 = require("./app/config/config");
 const index_1 = require("./app/resolvers/index");
 const app_1 = require("./app/app");
+const post_resolver_1 = require("./app/resolvers/post.resolver");
 const main = async () => {
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: await (0, type_graphql_1.buildSchema)({
             validate: false,
-            resolvers: [index_1.GreetingResolver, index_1.UserResolver],
+            resolvers: [index_1.GreetingResolver, index_1.AuthResolver, post_resolver_1.PostResolver],
         }),
         plugins: [
             (0, apollo_server_core_1.ApolloServerPluginDrainHttpServer)({ httpServer: app_1.httpServer }),

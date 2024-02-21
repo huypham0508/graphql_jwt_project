@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GreetingResolver = exports.UserResolver = void 0;
+exports.GreetingResolver = exports.AuthResolver = void 0;
 const greeting_resolver_1 = require("./greeting.resolver");
 Object.defineProperty(exports, "GreetingResolver", { enumerable: true, get: function () { return greeting_resolver_1.GreetingResolver; } });
-const user_resolver_1 = require("./user.resolver");
-Object.defineProperty(exports, "UserResolver", { enumerable: true, get: function () { return user_resolver_1.UserResolver; } });
+const auth_resolver_1 = require("./auth.resolver");
+Object.defineProperty(exports, "AuthResolver", { enumerable: true, get: function () { return auth_resolver_1.AuthResolver; } });
 //# sourceMappingURL=index.js.map

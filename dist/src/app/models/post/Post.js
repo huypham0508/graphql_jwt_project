@@ -12,59 +12,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserSchema = exports.IUser = void 0;
+exports.PostSchema = exports.IPost = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const type_graphql_1 = require("type-graphql");
 const Schema = mongoose_1.default.Schema;
 const model = mongoose_1.default.model;
-let IUser = exports.IUser = class IUser {
+let IPost = exports.IPost = class IPost {
 };
 __decorate([
     (0, type_graphql_1.Field)((_type) => type_graphql_1.ID),
     __metadata("design:type", Object)
-], IUser.prototype, "id", void 0);
+], IPost.prototype, "id", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
-], IUser.prototype, "userName", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(),
-    __metadata("design:type", String)
-], IUser.prototype, "email", void 0);
+], IPost.prototype, "userId", void 0);
 __decorate([
     (0, type_graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
-], IUser.prototype, "avatar", void 0);
-exports.IUser = IUser = __decorate([
+], IPost.prototype, "imageUrl", void 0);
+exports.IPost = IPost = __decorate([
     (0, type_graphql_1.ObjectType)()
-], IUser);
-exports.UserSchema = new Schema({
-    email: {
-        type: String,
-        require: true,
-    },
-    userName: {
-        type: String,
-        require: true,
-    },
-    password: {
-        type: String,
-        require: true,
-    },
-    token: {
+], IPost);
+exports.PostSchema = new Schema({
+    userId: {
         type: String,
     },
-    otp: {
+    imageUrl: {
         type: String,
     },
-    otpExpirationTime: {
-        type: Number,
-    },
-    tokenVersion: {
-        type: Number,
-        require: true,
+    description: {
+        type: String,
     },
 }, { timestamps: true });
-const User = model("users", exports.UserSchema);
-exports.default = User;
-//# sourceMappingURL=User.js.map
+const Post = model("post", exports.PostSchema);
+exports.default = Post;
+//# sourceMappingURL=Post.js.map

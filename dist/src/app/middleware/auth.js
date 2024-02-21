@@ -24,7 +24,7 @@ Auth.createToken = (type, user) => {
         .catch(() => {
         return (token = "");
     });
-    return token;
+    return token !== null && token !== void 0 ? token : "";
 };
 Auth.sendRefreshToken = (res, user) => {
     console.log("sending refresh token...");
@@ -33,8 +33,9 @@ Auth.sendRefreshToken = (res, user) => {
         httpOnly: true,
         secure: true,
         sameSite: "lax",
-        path: "/refresh_token",
+        path: "refreshToken",
     });
+    return token;
 };
 Auth.verifyToken = ({ context }, next) => {
     console.log("verifying token...");
@@ -49,7 +50,7 @@ Auth.verifyToken = ({ context }, next) => {
         })
             .then((data) => {
             if (!data) {
-                throw new apollo_server_express_1.AuthenticationError("token not found123");
+                throw new apollo_server_express_1.AuthenticationError("token not found");
             }
             const decodedToken = (0, jsonwebtoken_1.verify)(assetToken, config_1.ConfigJWT.JWT_ACCESS_PRIVATE_KEY);
             if (!decodedToken) {
@@ -59,7 +60,7 @@ Auth.verifyToken = ({ context }, next) => {
             return next();
         })
             .catch(() => {
-            throw new apollo_server_express_1.AuthenticationError("token not found12");
+            throw new apollo_server_express_1.AuthenticationError("token not found");
         });
     }
     catch (error) {
