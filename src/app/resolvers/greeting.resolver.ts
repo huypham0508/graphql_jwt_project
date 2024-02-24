@@ -1,6 +1,6 @@
 // import mongoose from "mongoose";
 import User from "../models/user/User";
-import lang from "../../../language/language.json";
+import lang from "../../public/language/language.json";
 import { Context } from "../types/Context";
 import { Auth } from "../middleware/auth";
 import {
