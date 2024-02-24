@@ -10,7 +10,7 @@ const storage = multer.diskStorage({
     if (__dirname.includes("src")) {
       typePath = "src";
     }
-    return cb(null, `${typePath}/public/uploads/`);
+    return cb(null, `dist/public/uploads/`);
   },
   filename: function (req, file, cb) {
     console.log(req, file);
