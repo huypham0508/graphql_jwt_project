@@ -8,7 +8,8 @@ const multer_1 = __importDefault(require("multer"));
 const storage = multer_1.default.diskStorage({
     destination: function (req, file, cb) {
         console.log(req, file);
-        return cb(null, "src/public/uploads/");
+        const typePath = process.env.NODE_ENV === "production" ? "dist" : "src";
+        return cb(null, `${typePath}/public/uploads/`);
     },
     filename: function (req, file, cb) {
         console.log(req, file);
@@ -16,4 +17,4 @@ const storage = multer_1.default.diskStorage({
     },
 });
 exports.uploadImage = (0, multer_1.default)({ storage: storage });
-//# sourceMappingURL=updateImage.js.map
+//# sourceMappingURL=uploadImage.js.map

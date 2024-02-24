@@ -4,7 +4,8 @@ import multer from "multer";
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     console.log(req, file);
-    return cb(null, "src/public/uploads/");
+    const typePath = process.env.NODE_ENV === "production" ? "dist" : "src";
+    return cb(null, `${typePath}/public/uploads/`);
   },
   filename: function (req, file, cb) {
     console.log(req, file);
