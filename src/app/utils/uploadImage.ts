@@ -1,16 +1,18 @@
 import multer from "multer";
 import dotenv from "dotenv";
+import path from "path";
 dotenv.config();
 // Multer configuration
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     console.log(req, file);
-    // let typePath = "dist";
-    // if (__dirname.includes("src")) {
-    //   typePath = "src";
-    // }
-    return cb(null, `dist/public/uploads/`);
+    const currentPath = path.resolve(__dirname);
+    let uploadPath = "src/public/uploads/";
+    if (currentPath.includes("dist")) {
+      uploadPath = "dist/public/uploads/";
+    }
+    return cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
     console.log(req, file);

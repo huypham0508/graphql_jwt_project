@@ -50,5 +50,5 @@ Trong dự án này, chúng ta có một số lệnh scripts được định ng
 # Chạy source với Docker
 
 ```shell
-docker run -d --name nodejs_graphql_container -p 4000:4000 manhhy/nodejs_graphql:0.1
+docker run -d --name nodejs_graphql_container -p 4000:4000 manhhy/nodejs_graphql
 ```
