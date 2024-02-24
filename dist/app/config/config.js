@@ -29,11 +29,11 @@ ConfigBcrypt.saltRounds = 10;
 class Otp {
 }
 exports.Otp = Otp;
-Otp.ACCESS_TOKEN = "ya29.a0AfB_byDFbyfxq8dJplv1CDcjcTq2aySNgEMwkbU_y01qLjBnzzH8VVS8StVRdDHPEDj96ZoojYVqw2Bf5CVgjxFnmxWPmpltJY0BxpUJLmnQadoEynkbolVhUbkTGwTVhM6Ccrm7fXL-3m1Fo13eT2jOUmpgqvNtthhTaCgYKAU0SARASFQHGX2Migi_fIL4hp7-A1XF3TunYlQ0171";
-Otp.REFRESH_TOKEN = "1//04AgIJmadjdoUCgYIARAAGAQSNwF-L9Ir7EXxbG76ld_98odkq73nvpp8fMxRbGER5ntQGiEQWn4l3XHHHBLD3h1h7_i-6SY4HY4";
-Otp.CLIENT_ID = "448160075675-bj8rn65b967s1t78bshbkg35jj5jiaf7.apps.googleusercontent.com";
-Otp.CLIENT_SECRET = "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";
+Otp.ACCESS_TOKEN = process.env.ACCESS_TOKEN_OAUTH;
+Otp.REFRESH_TOKEN = process.env.REFRESH_TOKEN_OAUTH;
+Otp.CLIENT_ID = process.env.CLIENT_ID;
+Otp.CLIENT_SECRET = process.env.CLIENT_SECRET;
 Otp.REDIRECT_URI = "https://developers.google.com/oauthplayground";
-Otp.MY_EMAIL = "phammanhhuy1107@gmail.com";
+Otp.MY_EMAIL = process.env.MY_EMAIL;
 Otp.EXPIRATION_TIME = 2 * 60 * 1000;
 //# sourceMappingURL=config.js.map
