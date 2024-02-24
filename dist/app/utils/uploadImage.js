@@ -10,7 +10,10 @@ dotenv_1.default.config();
 const storage = multer_1.default.diskStorage({
     destination: function (req, file, cb) {
         console.log(req, file);
-        const typePath = process.env.NODE_ENV === "production" ? "dist" : "src";
+        let typePath = "dist";
+        if (__dirname.includes("src")) {
+            typePath = "src";
+        }
         return cb(null, `${typePath}/public/uploads/`);
     },
     filename: function (req, file, cb) {
