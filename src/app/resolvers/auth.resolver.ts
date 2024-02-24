@@ -11,8 +11,8 @@ import sendEmail from "../utils/sendEmail";
 import { Context } from "../types/Context";
 import { LoginInput } from "../types/input/user/LoginInput";
 import { RegisterInput } from "../types/input/user/RegisterInput";
-import { UserMutationResponse } from "../types/response/user/UserMutationResponse";
 import { ForgotPasswordResponse } from "../types/response/auth/ForgotPasswordResponse";
+import { UserMutationResponse } from "../types/response/user/UserMutationResponse";
 
 @Resolver()
 export class AuthResolver {
