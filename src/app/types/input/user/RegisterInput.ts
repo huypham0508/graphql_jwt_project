@@ -8,4 +8,6 @@ export class RegisterInput {
   userName: string;
   @Field()
   password: string;
+  @Field({ nullable: true })
+  avatar?: string;
 }

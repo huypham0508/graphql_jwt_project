@@ -33,6 +33,9 @@ export const UserSchema = new Schema<IUser>(
       type: String,
       require: true,
     },
+    avatar: {
+      type: String,
+    },
     password: {
       type: String,
       require: true,

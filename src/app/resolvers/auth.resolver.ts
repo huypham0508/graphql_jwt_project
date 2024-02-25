@@ -1,4 +1,4 @@
-import { Arg, Ctx, ID, Mutation, Resolver } from "type-graphql";
+import { Arg, Ctx, ID, Mutation, Resolver, UseMiddleware } from "type-graphql";
 
 import { Bcrypt } from "../bcrypt/index";
 import { ConfigJWT, Otp } from "../config/config";
@@ -13,6 +13,7 @@ import { LoginInput } from "../types/input/user/LoginInput";
 import { RegisterInput } from "../types/input/user/RegisterInput";
 import { ForgotPasswordResponse } from "../types/response/auth/ForgotPasswordResponse";
 import { UserMutationResponse } from "../types/response/user/UserMutationResponse";
+import { UpdateUserInput } from "../types/input/user/UpdateUserInput";
 
 @Resolver()
 export class AuthResolver {
@@ -22,7 +23,7 @@ export class AuthResolver {
     registerInput: RegisterInput
   ): Promise<UserMutationResponse> {
     console.log("register is working...");
-    const { email, userName, password } = registerInput;
+    const { email, userName, password, avatar } = registerInput;
     const existingUser = await User.findOne({
       email,
     });
@@ -38,6 +39,7 @@ export class AuthResolver {
       email,
       userName,
       password: hashedPassword,
+      avatar: avatar,
       tokenVersion: 0,
       otp: null,
       otpExpirationTime: null,
@@ -47,6 +49,7 @@ export class AuthResolver {
       code: 200,
       success: true,
       message: "User registered successfully!!!",
+      user: newUser,
     };
   }
 
@@ -104,6 +107,7 @@ export class AuthResolver {
         email: checkAccount.email,
         userName: checkAccount.userName,
         password: "checkAccount.password",
+        avatar: checkAccount.avatar,
         // tokenVersion: checkAccount.tokenVersion,
       },
     };
@@ -252,6 +256,49 @@ export class AuthResolver {
       success: true,
       message: "Logged out successfully!!!",
     };
+  }
+
+  @Mutation((_return) => UserMutationResponse)
+  @UseMiddleware(Auth.verifyToken)
+  async updateUser(
+    @Arg("updateUserInput") updateUserInput: UpdateUserInput,
+    @Ctx() context: Context
+  ): Promise<UserMutationResponse> {
+    try {
+      const { username, avatar } = updateUserInput;
+      const existingUser = await User.findById(context.user.id);
+
+      if (!existingUser) {
+        return {
+          code: 404,
+          success: false,
+          message: "User not found",
+        };
+      }
+
+      if (username) {
+        existingUser.userName = username;
+      }
+
+      if (avatar) {
+        existingUser.avatar = avatar;
+      }
+
+      await existingUser.save();
+
+      return {
+        code: 200,
+        success: true,
+        message: "User updated successfully",
+        user: existingUser,
+      };
+    } catch (error) {
+      return {
+        code: 400,
+        success: false,
+        message: error.message,
+      };
+    }
   }
 }
 // @Query((_return) => [IUser])
