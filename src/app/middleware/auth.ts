@@ -65,7 +65,8 @@ export class Auth {
             throw new AuthenticationError("Invalid token");
           }
           context.user = decodedToken;
-          return next();
+          next();
+          return true;
         })
         .catch(() => {
           throw new AuthenticationError("token not found");
