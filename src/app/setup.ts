@@ -10,12 +10,12 @@ const connectedUsers: Map<string, Socket> = new Map();
 
 try {
   io.on("connection", (socket: Socket) => {
-    setInterval(() => {
-      socket.emit("connected", {
-        message: "Connected",
-        success: true,
-      });
-    }, 1000);
+    // setInterval(() => {
+    //   socket.emit("connected", {
+    //     message: "Connected",
+    //     success: true,
+    //   });
+    // }, 1000);
 
     socket.on("login", (userId: string) => {
       connectedUsers.set(userId, socket);

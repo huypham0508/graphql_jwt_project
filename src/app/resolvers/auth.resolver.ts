@@ -74,7 +74,7 @@ export class AuthResolver {
       };
     }
     //check password
-    hashPassword = await checkAccount.password;
+    hashPassword = checkAccount.password;
     const checkPassword = await Bcrypt.comparePassword(password, hashPassword);
     if (!checkPassword) {
       return {

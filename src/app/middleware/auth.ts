@@ -1,11 +1,11 @@
-import { Secret, sign, verify } from "jsonwebtoken";
-import User, { IUser } from "../models/user/User";
-import { ConfigJWT } from "../config/config";
-import { MiddlewareFn } from "type-graphql";
-import { Context } from "../types/Context";
 import { AuthenticationError } from "apollo-server-express";
-import { UserAuthPayload } from "../types/UserAuthPayload";
 import { Response } from "express";
+import { Secret, sign, verify } from "jsonwebtoken";
+import { MiddlewareFn } from "type-graphql";
+import { ConfigJWT } from "../config/config";
+import User, { IUser } from "../models/user/User";
+import { Context } from "../types/Context";
+import { UserAuthPayload } from "../types/UserAuthPayload";
 
 export class Auth {
   public static createToken = (type: ConfigJWT, user: IUser) => {
@@ -50,20 +50,23 @@ export class Auth {
         throw new AuthenticationError("No token provided");
       }
 
+      const decodedToken = verify(
+        assetToken,
+        ConfigJWT.JWT_ACCESS_PRIVATE_KEY as Secret
+      ) as UserAuthPayload;
+
       return User.findOne({
-        token: assetToken,
+        _id: decodedToken.id,
+        email: decodedToken.email,
       })
         .then((data) => {
           if (!data) {
-            throw new AuthenticationError("token not found");
+            return new AuthenticationError("Token not found");
           }
-          const decodedToken = verify(
-            assetToken,
-            ConfigJWT.JWT_ACCESS_PRIVATE_KEY as Secret
-          ) as UserAuthPayload;
-          if (!decodedToken) {
-            throw new AuthenticationError("Invalid token");
+          if (data.tokenVersion != decodedToken.tokenVersion) {
+            return new AuthenticationError("Token version note match");
           }
+
           context.user = decodedToken;
           next();
           return true;
