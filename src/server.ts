@@ -4,13 +4,11 @@ import {
   ApolloServerPluginDrainHttpServer,
   // ApolloServerPluginLandingPageGraphQLPlayground
 } from "apollo-server-core";
-import cors from "cors";
-import cookieParser from "cookie-parser";
 import connectDB from "./app/utils/connectDB";
 import { buildSchema } from "type-graphql";
 import { ConfigServer } from "./app/config/config";
 import { GreetingResolver, AuthResolver } from "./app/resolvers/index";
-import { app, httpServer } from "./app/setup";
+import { app, httpServer } from "./app/app";
 import { PostResolver } from "./app/resolvers/post.resolver";
 
 const main = async () => {
@@ -27,8 +25,7 @@ const main = async () => {
       return { req, res };
     },
   });
-  app.use(cors());
-  app.use(cookieParser());
+
   await connectDB();
   await apolloServer.start();
   apolloServer.applyMiddleware({ app });

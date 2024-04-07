@@ -10,7 +10,7 @@ const refreshToken = Router();
 refreshToken.get("/", async (req, res): Promise<any> => {
   console.log("sending refresh token...");
   const nameCookie = ConfigJWT.REFRESH_TOKEN_COOKIE_NAME;
-  const refreshToken = await req.cookies[nameCookie];
+  const refreshToken = await req?.cookies[nameCookie];
   console.log("refreshing token" + refreshToken);
 
   // console.log({ refreshToken });
@@ -70,5 +70,4 @@ refreshToken.get("/", async (req, res): Promise<any> => {
     });
   }
 });
-
 export default refreshToken;
