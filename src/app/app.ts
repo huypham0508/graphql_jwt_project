@@ -1,22 +1,29 @@
-import express from "express";
-import { createServer } from "http";
-import refreshToken from "./routes/refreshToken";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import { uploadImage } from "./utils/uploadImage";
-import { handleUpload } from "./controllers/uploadImageController";
 import path from "path";
 
+import { createServer } from "http";
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+
+import handleRealtimeConnect from "./realtime";
+import refreshToken from "./routes/refreshToken";
+import { uploadImage } from "./utils/uploadImage";
+import { handleUpload } from "./controllers/uploadImageController";
+
 const app = express();
-app.use("/public", express.static(path.join(__dirname, "../public")));
+const httpServer = createServer(app);
+
 app.use(cors());
 app.use(cookieParser());
-const httpServer = createServer(app);
+
+app.use("/public", express.static(path.join(__dirname, "../public")));
 app.use("/refreshToken", refreshToken);
 app.post(
   "/upload",
   uploadImage.fields([{ name: "file", maxCount: 1 }]),
   handleUpload
 );
+
+handleRealtimeConnect(httpServer);
 
 export { app, httpServer };

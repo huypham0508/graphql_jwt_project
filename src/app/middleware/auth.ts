@@ -1,15 +1,15 @@
-import { Secret, sign, verify } from "jsonwebtoken";
-import User, { IUser } from "../models/user/User";
-import { ConfigJWT } from "../config/config";
-import { MiddlewareFn } from "type-graphql";
-import { Context } from "../types/Context";
 import { AuthenticationError } from "apollo-server-express";
-import { UserAuthPayload } from "../types/UserAuthPayload";
 import { Response } from "express";
+import { Secret, sign, verify } from "jsonwebtoken";
+import { MiddlewareFn } from "type-graphql";
+import { ConfigJWT } from "../config/config";
+import User, { IUser } from "../models/user/User";
+import { Context } from "../types/Context";
+import { UserAuthPayload } from "../types/UserAuthPayload";
 
 export class Auth {
   public static createToken = (type: ConfigJWT, user: IUser) => {
-    console.log("creating new token...");
+    // console.log("creating new token...");
     const checkType = type === ConfigJWT.create_token_type;
     let token = sign(
       user,
@@ -18,17 +18,17 @@ export class Auth {
         : (ConfigJWT.JWT_REFRESH_PRIVATE_KEY as Secret),
       { expiresIn: type === checkType ? "15m" : "60m" }
     );
-    User.updateOne({ _id: user.id, userName: user.userName }, { token: token })
-      .then(() => {
-        return token;
-      })
-      .catch(() => {
-        return (token = "");
-      });
+    // User.updateOne({ _id: user.id, userName: user.userName }, { token: token })
+    //   .then(() => {
+    //     return token;
+    //   })
+    //   .catch(() => {
+    //     return (token = "");
+    //   });
     return token ?? "";
   };
   public static sendRefreshToken = (res: Response, user: IUser) => {
-    console.log("sending refresh token...");
+    // console.log("sending refresh token...");
 
     const token = Auth.createToken(ConfigJWT.refresh_token_type, user);
 
@@ -40,8 +40,11 @@ export class Auth {
     });
     return token;
   };
-  public static verifyToken: MiddlewareFn<Context> = ({ context }, next) => {
-    console.log("verifying token...");
+  public static verifyToken: MiddlewareFn<Context> = async (
+    { context },
+    next
+  ) => {
+    // console.log("verifying token...");
     try {
       const authHeader = context.req.header("Authorization");
       const assetToken = authHeader && authHeader.split(" ")[1];
@@ -50,25 +53,29 @@ export class Auth {
         throw new AuthenticationError("No token provided");
       }
 
+      const decodedToken = verify(
+        assetToken,
+        ConfigJWT.JWT_ACCESS_PRIVATE_KEY as Secret
+      ) as UserAuthPayload;
+
       return User.findOne({
-        token: assetToken,
+        _id: decodedToken.id,
+        email: decodedToken.email,
       })
         .then((data) => {
           if (!data) {
-            throw new AuthenticationError("token not found");
+            return new AuthenticationError("Data not found");
           }
-          const decodedToken = verify(
-            assetToken,
-            ConfigJWT.JWT_ACCESS_PRIVATE_KEY as Secret
-          ) as UserAuthPayload;
-          if (!decodedToken) {
-            throw new AuthenticationError("Invalid token");
+          if (data.tokenVersion != decodedToken.tokenVersion) {
+            return new AuthenticationError("Token version not match");
           }
+
           context.user = decodedToken;
-          return next();
+          next();
+          return true;
         })
         .catch(() => {
-          throw new AuthenticationError("token not found");
+          throw new AuthenticationError("Token error");
         });
     } catch (error) {
       throw new AuthenticationError("Error while verifying token", error);

@@ -4,7 +4,6 @@ import {
   ApolloServerPluginDrainHttpServer,
   // ApolloServerPluginLandingPageGraphQLPlayground
 } from "apollo-server-core";
-import cors from "cors";
 import connectDB from "./app/utils/connectDB";
 import { buildSchema } from "type-graphql";
 import { ConfigServer } from "./app/config/config";
@@ -26,7 +25,7 @@ const main = async () => {
       return { req, res };
     },
   });
-  app.use(cors());
+
   await connectDB();
   await apolloServer.start();
   apolloServer.applyMiddleware({ app });
