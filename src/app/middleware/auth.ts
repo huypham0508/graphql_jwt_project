@@ -9,7 +9,7 @@ import { UserAuthPayload } from "../types/UserAuthPayload";
 
 export class Auth {
   public static createToken = (type: ConfigJWT, user: IUser) => {
-    console.log("creating new token...");
+    // console.log("creating new token...");
     const checkType = type === ConfigJWT.create_token_type;
     let token = sign(
       user,
@@ -18,17 +18,17 @@ export class Auth {
         : (ConfigJWT.JWT_REFRESH_PRIVATE_KEY as Secret),
       { expiresIn: type === checkType ? "15m" : "60m" }
     );
-    User.updateOne({ _id: user.id, userName: user.userName }, { token: token })
-      .then(() => {
-        return token;
-      })
-      .catch(() => {
-        return (token = "");
-      });
+    // User.updateOne({ _id: user.id, userName: user.userName }, { token: token })
+    //   .then(() => {
+    //     return token;
+    //   })
+    //   .catch(() => {
+    //     return (token = "");
+    //   });
     return token ?? "";
   };
   public static sendRefreshToken = (res: Response, user: IUser) => {
-    console.log("sending refresh token...");
+    // console.log("sending refresh token...");
 
     const token = Auth.createToken(ConfigJWT.refresh_token_type, user);
 
@@ -40,8 +40,11 @@ export class Auth {
     });
     return token;
   };
-  public static verifyToken: MiddlewareFn<Context> = ({ context }, next) => {
-    console.log("verifying token...");
+  public static verifyToken: MiddlewareFn<Context> = async (
+    { context },
+    next
+  ) => {
+    // console.log("verifying token...");
     try {
       const authHeader = context.req.header("Authorization");
       const assetToken = authHeader && authHeader.split(" ")[1];
@@ -61,10 +64,10 @@ export class Auth {
       })
         .then((data) => {
           if (!data) {
-            return new AuthenticationError("Token not found");
+            return new AuthenticationError("Data not found");
           }
           if (data.tokenVersion != decodedToken.tokenVersion) {
-            return new AuthenticationError("Token version note match");
+            return new AuthenticationError("Token version not match");
           }
 
           context.user = decodedToken;
@@ -72,7 +75,7 @@ export class Auth {
           return true;
         })
         .catch(() => {
-          throw new AuthenticationError("token not found");
+          throw new AuthenticationError("Token error");
         });
     } catch (error) {
       throw new AuthenticationError("Error while verifying token", error);

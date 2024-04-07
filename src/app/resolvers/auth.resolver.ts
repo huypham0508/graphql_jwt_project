@@ -22,7 +22,7 @@ export class AuthResolver {
     @Arg("registerInput")
     registerInput: RegisterInput
   ): Promise<UserMutationResponse> {
-    console.log("register is working...");
+    // console.log("register is working...");
     const { email, userName, password, avatar } = registerInput;
     const existingUser = await User.findOne({
       email,
@@ -59,23 +59,26 @@ export class AuthResolver {
     { email, password }: LoginInput,
     @Ctx() { res }: Context
   ): Promise<UserMutationResponse> {
-    console.log("login is working...");
+    // console.log("login is working...");
 
     let hashPassword = "";
     const checkAccount = await User.findOne({
       email,
     });
+
     //check email
     if (!checkAccount) {
       return {
         code: 400,
         success: false,
-        message: "Email error!!!",
+        message: "Email not found!!!",
       };
     }
+
     //check password
     hashPassword = checkAccount.password;
     const checkPassword = await Bcrypt.comparePassword(password, hashPassword);
+
     if (!checkPassword) {
       return {
         code: 400,
@@ -83,6 +86,7 @@ export class AuthResolver {
         message: "Password error!!!",
       };
     }
+
     const refreshToken = Auth.sendRefreshToken(res, {
       id: checkAccount._id,
       email: checkAccount.email,
@@ -108,7 +112,6 @@ export class AuthResolver {
         userName: checkAccount.userName,
         password: "checkAccount.password",
         avatar: checkAccount.avatar,
-        // tokenVersion: checkAccount.tokenVersion,
       },
     };
   }
@@ -226,7 +229,7 @@ export class AuthResolver {
     @Arg("id", (_type) => ID) id: any,
     @Ctx() { res }: Context
   ): Promise<UserMutationResponse> {
-    console.log("logout is working...");
+    // console.log("logout is working...");
     const existingUser = await User.findOne({
       _id: id,
     });
