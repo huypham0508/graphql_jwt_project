@@ -76,7 +76,7 @@ export class AuthResolver {
     }
 
     //check password
-    hashPassword = checkAccount.password;
+    hashPassword = checkAccount?.password ?? "";
     const checkPassword = await Bcrypt.comparePassword(password, hashPassword);
 
     if (!checkPassword) {
@@ -94,12 +94,15 @@ export class AuthResolver {
       tokenVersion: checkAccount.tokenVersion,
       password: "",
     });
+
     const userModel: IUser = {
       id: checkAccount._id,
       email: checkAccount.email,
       userName: checkAccount.userName,
+      tokenVersion: checkAccount.tokenVersion,
       password: "",
     };
+
     return {
       code: 200,
       success: true,
@@ -110,7 +113,7 @@ export class AuthResolver {
         id: checkAccount._id,
         email: checkAccount.email,
         userName: checkAccount.userName,
-        password: "checkAccount.password",
+        password: "",
         avatar: checkAccount.avatar,
       },
     };

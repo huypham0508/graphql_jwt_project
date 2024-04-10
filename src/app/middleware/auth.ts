@@ -18,13 +18,6 @@ export class Auth {
         : (ConfigJWT.JWT_REFRESH_PRIVATE_KEY as Secret),
       { expiresIn: type === checkType ? "15m" : "60m" }
     );
-    // User.updateOne({ _id: user.id, userName: user.userName }, { token: token })
-    //   .then(() => {
-    //     return token;
-    //   })
-    //   .catch(() => {
-    //     return (token = "");
-    //   });
     return token ?? "";
   };
   public static sendRefreshToken = (res: Response, user: IUser) => {
