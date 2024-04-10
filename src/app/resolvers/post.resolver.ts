@@ -6,13 +6,13 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
+import { verifyTokenAll } from "../middleware/auth";
 import Post from "../models/post/Post";
-import { GetAllPostResponse } from "../types/response/post/GetAllPostResponse";
-import { Auth } from "../middleware/auth";
-import { Context } from "../types/Context";
 import User from "../models/user/User";
-import { PostMutationResponse } from "../types/response/post/PostMutationResponse";
+import { Context } from "../types/Context";
 import { CreatePostInput } from "../types/input/post/createPostInput";
+import { GetAllPostResponse } from "../types/response/post/GetAllPostResponse";
+import { PostMutationResponse } from "../types/response/post/PostMutationResponse";
 
 @Resolver()
 export class PostResolver {
@@ -39,7 +39,7 @@ export class PostResolver {
       throw new Error("Could not fetch posts");
     }
   }
-  @UseMiddleware(Auth.verifyToken)
+  @UseMiddleware(verifyTokenAll)
   @Mutation(() => PostMutationResponse)
   async createPost(
     @Arg("postInput") postInput: CreatePostInput,
