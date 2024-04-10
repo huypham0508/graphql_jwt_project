@@ -1,19 +1,25 @@
 import { Arg, Ctx, ID, Mutation, Resolver, UseMiddleware } from "type-graphql";
 
 import { Bcrypt } from "../bcrypt/index";
-import { ConfigJWT, Otp } from "../config/config";
-import { Auth } from "../middleware/auth";
-import User, { IUser } from "../models/user/User";
+import { ConfigJWT, Otp, Role } from "../config/config";
+import {
+  Auth,
+  verifyTokenAll,
+  verifyTokenForgotPassword,
+} from "../middleware/auth";
+import User from "../models/user/User";
 
 import generateOTP from "../utils/generateOTP";
-import sendEmail from "../utils/sendEmail";
 
+import { ApolloError } from "apollo-server-core";
 import { Context } from "../types/Context";
 import { LoginInput } from "../types/input/user/LoginInput";
 import { RegisterInput } from "../types/input/user/RegisterInput";
+import { UpdateUserInput } from "../types/input/user/UpdateUserInput";
 import { ForgotPasswordResponse } from "../types/response/auth/ForgotPasswordResponse";
 import { UserMutationResponse } from "../types/response/user/UserMutationResponse";
-import { UpdateUserInput } from "../types/input/user/UpdateUserInput";
+import { TokenPayLoad } from "../types/TokenPayload";
+import sendEmail from "../utils/sendEmail";
 
 @Resolver()
 export class AuthResolver {
@@ -41,8 +47,8 @@ export class AuthResolver {
       password: hashedPassword,
       avatar: avatar,
       tokenVersion: 0,
-      otp: null,
-      otpExpirationTime: null,
+      otp: undefined,
+      otpExpirationTime: undefined,
     });
     await newUser.save();
     return {
@@ -76,7 +82,7 @@ export class AuthResolver {
     }
 
     //check password
-    hashPassword = checkAccount.password;
+    hashPassword = checkAccount?.password ?? "";
     const checkPassword = await Bcrypt.comparePassword(password, hashPassword);
 
     if (!checkPassword) {
@@ -87,19 +93,16 @@ export class AuthResolver {
       };
     }
 
-    const refreshToken = Auth.sendRefreshToken(res, {
+    const userModel: TokenPayLoad = {
       id: checkAccount._id,
       email: checkAccount.email,
       userName: checkAccount.userName,
-      tokenVersion: checkAccount.tokenVersion,
-      password: "",
-    });
-    const userModel: IUser = {
-      id: checkAccount._id,
-      email: checkAccount.email,
-      userName: checkAccount.userName,
-      password: "",
+      tokenVersion: checkAccount.tokenVersion ?? 0,
+      role: Role.ALL,
     };
+
+    const refreshToken = Auth.sendRefreshToken(res, userModel);
+
     return {
       code: 200,
       success: true,
@@ -110,7 +113,7 @@ export class AuthResolver {
         id: checkAccount._id,
         email: checkAccount.email,
         userName: checkAccount.userName,
-        password: "checkAccount.password",
+        password: "",
         avatar: checkAccount.avatar,
       },
     };
@@ -171,7 +174,7 @@ export class AuthResolver {
       return {
         code: 400,
         success: false,
-        message: "Invalid OTP.",
+        message: "OTP not match",
       };
     }
     const dateNow = Date.now();
@@ -188,40 +191,61 @@ export class AuthResolver {
       { otp: null, otpExpirationTime: null }
     );
 
+    const tokenPayLoad: TokenPayLoad = {
+      id: user._id,
+      email: user.email,
+      userName: user.userName,
+      tokenVersion: user.tokenVersion ?? 0,
+      role: Role.FORGOT_PASSWORD,
+    };
+
+    const token = Auth.createToken(ConfigJWT.create_token_type, tokenPayLoad);
+
     return {
       code: 200,
       success: true,
+      accessToken: token,
       message: "OTP submitted successfully.",
     };
   }
 
+  @UseMiddleware(verifyTokenForgotPassword)
   @Mutation((_return) => ForgotPasswordResponse)
   async resetPassword(
-    @Arg("email") email: string,
-    @Arg("newPassword") newPassword: string
+    @Arg("newPassword") newPassword: string,
+    @Ctx() { user: payloadVerify }: Context
   ): Promise<ForgotPasswordResponse> {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: payloadVerify.email });
 
     if (!user) {
-      return {
-        code: 400,
-        success: false,
-        message: "Email not found.",
-      };
+      throw new ApolloError("Email not found.", "EMAIL_NOT_FOUND");
     }
 
-    const hashedPassword = await Bcrypt.hashPassword(newPassword);
+    try {
+      const hashedPassword = await Bcrypt.hashPassword(newPassword);
+      const versionPlus = !isNaN(Number(user.tokenVersion))
+        ? user.tokenVersion! + 1
+        : 0;
 
-    await User.updateOne(
-      { _id: user.id, email: email },
-      { password: hashedPassword }
-    );
-
-    return {
-      code: 200,
-      success: true,
-      message: "Password reset successfully.",
-    };
+      await User.updateOne(
+        { _id: user.id, email: payloadVerify.email },
+        {
+          password: hashedPassword,
+          tokenVersion: versionPlus,
+        }
+      );
+      return {
+        code: 200,
+        success: true,
+        message: "Password reset successfully.",
+      };
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      throw new ApolloError(
+        "Failed to reset password.",
+        "RESET_PASSWORD_FAILED"
+      );
+    }
   }
 
   @Mutation((_return) => UserMutationResponse)
@@ -261,8 +285,8 @@ export class AuthResolver {
     };
   }
 
+  @UseMiddleware(verifyTokenAll)
   @Mutation((_return) => UserMutationResponse)
-  @UseMiddleware(Auth.verifyToken)
   async updateUser(
     @Arg("updateUserInput") updateUserInput: UpdateUserInput,
     @Ctx() context: Context
@@ -304,9 +328,3 @@ export class AuthResolver {
     }
   }
 }
-// @Query((_return) => [IUser])
-// async getUser(): Promise<IUser[]> {
-//   const data = await User.find();
-//   return data;
-// }
-// @UseMiddleware(Auth.verifyToken)

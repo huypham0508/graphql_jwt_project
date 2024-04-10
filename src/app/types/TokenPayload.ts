@@ -3,6 +3,5 @@ export interface TokenPayLoad {
   email: string;
   userName: string;
   tokenVersion: number;
-  iat: number;
-  exp: number;
+  role: string;
 }

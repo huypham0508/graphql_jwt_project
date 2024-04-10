@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { ConfigJWT } from "../config/config";
+import { ConfigJWT, Role } from "../config/config";
 import { Secret, verify } from "jsonwebtoken";
 import { UserAuthPayload } from "../types/UserAuthPayload";
 import User from "../models/user/User";
 import { Auth } from "../middleware/auth";
+import { TokenPayLoad } from "../types/TokenPayload";
 
 const refreshToken = Router();
 
@@ -12,8 +13,6 @@ refreshToken.get("/", async (req, res): Promise<any> => {
   const nameCookie = ConfigJWT.REFRESH_TOKEN_COOKIE_NAME;
   const refreshToken = await req?.cookies[nameCookie];
   console.log("refreshing token" + refreshToken);
-
-  // console.log({ refreshToken });
 
   if (!refreshToken) {
     return res.status(403).json({
@@ -45,12 +44,15 @@ refreshToken.get("/", async (req, res): Promise<any> => {
       });
     }
 
-    Auth.sendRefreshToken(res, {
+    const tokenPayload: TokenPayLoad = {
       id: existingUser._id,
       email: existingUser.email,
       userName: existingUser.userName,
-      password: "",
-    });
+      tokenVersion: existingUser.tokenVersion ?? 0,
+      role: Role.ALL,
+    };
+
+    Auth.sendRefreshToken(res, tokenPayload);
 
     return res.status(200).json({
       success: true,

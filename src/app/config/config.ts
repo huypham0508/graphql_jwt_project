@@ -18,6 +18,11 @@ export class ConfigJWT {
   public static REFRESH_TOKEN_COOKIE_NAME: any =
     process.env.REFRESH_TOKEN_COOKI_NAME;
 }
+
+export class Role {
+  public static ALL: string = "ALL";
+  public static FORGOT_PASSWORD: string = "FORGOT_PASSWORD";
+}
 export class ConfigBcrypt {
   public static saltRounds = 10;
 }
@@ -29,5 +34,5 @@ export class Otp {
   public static CLIENT_SECRET = process.env.CLIENT_SECRET;
   public static REDIRECT_URI = "https://developers.google.com/oauthplayground";
   public static MY_EMAIL = process.env.MY_EMAIL;
-  public static EXPIRATION_TIME = 2 * 60 * 1000;
+  public static EXPIRATION_TIME = 2 * 60;
 }
