@@ -13,7 +13,6 @@ export class GreetingResolver {
     const data = await User.findOne({
       _id: id,
     });
-    console.log({ data });
 
     if (!data) {
       return `data not found`;

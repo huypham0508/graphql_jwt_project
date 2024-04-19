@@ -11,8 +11,10 @@ const refreshToken = Router();
 refreshToken.get("/", async (req, res): Promise<any> => {
   console.log("sending refresh token...");
   const nameCookie = ConfigJWT.REFRESH_TOKEN_COOKIE_NAME;
-  const refreshToken = await req?.cookies[nameCookie];
-  console.log("refreshing token" + refreshToken);
+  let refreshToken = await req?.cookies[nameCookie];
+  if (!refreshToken) {
+    refreshToken = req.header(nameCookie);
+  }
 
   if (!refreshToken) {
     return res.status(403).json({
@@ -52,17 +54,11 @@ refreshToken.get("/", async (req, res): Promise<any> => {
       role: Role.ALL,
     };
 
-    Auth.sendRefreshToken(res, tokenPayload);
-
     return res.status(200).json({
       success: true,
       message: "Successfully!!!",
-      accessToken: Auth.createToken(ConfigJWT.create_token_type, {
-        id: existingUser._id,
-        email: existingUser.email,
-        userName: existingUser.userName,
-        password: "",
-      }),
+      refreshToken: Auth.sendRefreshToken(res, tokenPayload),
+      accessToken: Auth.createToken(ConfigJWT.create_token_type, tokenPayload),
     });
   } catch (error) {
     console.log(error);

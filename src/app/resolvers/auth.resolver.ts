@@ -223,15 +223,15 @@ export class AuthResolver {
 
     try {
       const hashedPassword = await Bcrypt.hashPassword(newPassword);
-      const versionPlus = !isNaN(Number(user.tokenVersion))
-        ? user.tokenVersion! + 1
-        : 0;
+      // const versionPlus = !isNaN(Number(user.tokenVersion))
+      //   ? user.tokenVersion! + 1
+      //   : 0;
 
       await User.updateOne(
         { _id: user.id, email: payloadVerify.email },
         {
           password: hashedPassword,
-          tokenVersion: versionPlus,
+          // tokenVersion: versionPlus,
         }
       );
       return {

@@ -52,3 +52,7 @@ Trong dự án này, chúng ta có một số lệnh scripts được định ng
 ```shell
 docker run -d --name nodejs_graphql_container -p 4000:4000 manhhy/nodejs_graphql:tag
 ```
+
+```shell
+ docker build -t manhhy/nodejs_graphql:tag .
+```

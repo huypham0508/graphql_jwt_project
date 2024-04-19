@@ -1,4 +1,4 @@
-import { AuthenticationError } from "apollo-server-express";
+import { ApolloError, AuthenticationError } from "apollo-server-express";
 import { Response } from "express";
 import { Secret, sign, verify } from "jsonwebtoken";
 import { MiddlewareFn } from "type-graphql";
@@ -11,13 +11,15 @@ export class Auth {
   public static createToken = (type: ConfigJWT, user: any) => {
     // console.log("creating new token...");
     const checkType = type === ConfigJWT.create_token_type;
+
     let token = sign(
       user,
       checkType
         ? (ConfigJWT.JWT_ACCESS_PRIVATE_KEY as Secret)
         : (ConfigJWT.JWT_REFRESH_PRIVATE_KEY as Secret),
-      { expiresIn: type === checkType ? "15m" : "60m" }
+      { expiresIn: checkType ? "1m" : "10m" }
     );
+
     return token ?? "";
   };
   public static sendRefreshToken = (res: Response, user: IUser) => {
@@ -42,7 +44,7 @@ export class Auth {
 
       try {
         if (!assetToken && assetToken !== "") {
-          return new AuthenticationError("No token provided");
+          throw new AuthenticationError("No token provided");
         }
 
         const decodedToken = verify(
@@ -57,19 +59,18 @@ export class Auth {
           });
 
           if (!data) {
-            return new AuthenticationError("Data not found");
+            throw new AuthenticationError("Data not found");
           }
           if (data && data.tokenVersion != decodedToken.tokenVersion) {
-            return new AuthenticationError("Token version not match");
+            throw new AuthenticationError("Token version not match");
           }
 
           context.user = decodedToken;
           return next();
         }
-
-        return new AuthenticationError("Unauthorized");
+        throw new AuthenticationError("Unauthorized");
       } catch (error) {
-        return new AuthenticationError("Error while verifying token", error);
+        throw new ApolloError("Unauthorized", error);
       }
     };
 }
