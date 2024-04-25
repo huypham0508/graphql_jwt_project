@@ -7,19 +7,23 @@ import {
   UseMiddleware,
 } from "type-graphql";
 import { verifyTokenAll } from "../middleware/auth";
-import Post from "../models/post/Post";
-import User from "../models/user/User";
+import Post from "../models/post/post.model";
+import User from "../models/user/user.model";
 import { Context } from "../types/Context";
 import { CreatePostInput } from "../types/input/post/createPostInput";
-import { GetAllPostResponse } from "../types/response/post/GetAllPostResponse";
+import { GetListPostResponse } from "../types/response/post/GetAllPostResponse";
 import { PostMutationResponse } from "../types/response/post/PostMutationResponse";
+import Reaction from "../models/reaction/reaction.model.ts";
+import { FriendModel, IFriend } from "../models/friend/friend.model";
+import { FriendStatus } from "../enum/friend.enum";
 
 @Resolver()
 export class PostResolver {
-  @Query((_return) => GetAllPostResponse)
-  async allPosts(): Promise<GetAllPostResponse> {
+  @Query((_return) => GetListPostResponse)
+  async allPosts(): Promise<GetListPostResponse> {
     try {
-      const posts = await Post.find();
+      const posts = await Post.find().populate("user");
+
       if (posts.length == 0) {
         return {
           code: 200,
@@ -39,6 +43,48 @@ export class PostResolver {
       throw new Error("Could not fetch posts");
     }
   }
+
+  @UseMiddleware(verifyTokenAll)
+  @Query((_return) => GetListPostResponse)
+  async postsOfFriends(@Ctx() { user }: Context): Promise<GetListPostResponse> {
+    try {
+      const friends: IFriend[] = await FriendModel.find({
+        $or: [
+          { user: user.id, status: FriendStatus.ACCEPTED },
+          { friend: user.id, status: FriendStatus.ACCEPTED },
+        ],
+      });
+
+      const friendIds: string[] = friends.map((friend) => {
+        return friend.user.toString() === user.id
+          ? friend.friend.toString()
+          : friend.user.toString();
+      });
+
+      const postsOfFriends = await Post.find({
+        userId: { $in: friendIds },
+      });
+
+      if (postsOfFriends.length == 0) {
+        return {
+          code: 200,
+          success: true,
+          message: "postsOfFriends is empty",
+          data: postsOfFriends,
+        };
+      }
+
+      return {
+        code: 200,
+        success: true,
+        message: "get all postsOfFriends",
+        data: postsOfFriends,
+      };
+    } catch (error) {
+      throw new Error("Could not fetch posts of friends");
+    }
+  }
+
   @UseMiddleware(verifyTokenAll)
   @Mutation(() => PostMutationResponse)
   async createPost(
@@ -55,10 +101,19 @@ export class PostResolver {
         };
       }
 
+      const reactions = await Reaction.find();
+
+      const postReactions = reactions.map((reaction) => ({
+        name: reaction.name,
+        count: reaction.count,
+        imageURL: reaction.imageURL,
+      }));
+
       const newPost = new Post({
         imageUrl: postInput.imageUrl,
         description: postInput.description,
-        userId: user.id,
+        user: user.id,
+        reactions: postReactions,
       });
 
       await newPost.save();
@@ -68,6 +123,124 @@ export class PostResolver {
         success: true,
         message: "Post created successfully!",
         data: newPost,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        code: 500,
+        success: false,
+        message: "Internal server error",
+      };
+    }
+  }
+
+  @UseMiddleware(verifyTokenAll)
+  @Mutation(() => PostMutationResponse)
+  async increaseReactionCount(
+    @Arg("postId") postId: string,
+    @Arg("reactName") reactName: string,
+    @Ctx() { user }: Context
+  ): Promise<PostMutationResponse> {
+    try {
+      const existingUser = await User.findById(user.id);
+      if (!existingUser) {
+        return {
+          code: 404,
+          success: false,
+          message: "User not found!",
+        };
+      }
+
+      const post = await Post.findById(postId);
+      if (!post) {
+        return {
+          code: 404,
+          success: false,
+          message: "Post not found!",
+        };
+      }
+
+      const reaction = post.reactions.find(
+        (reaction) => reaction.name === reactName
+      );
+
+      if (!reaction) {
+        return {
+          code: 404,
+          success: false,
+          message: "Reaction not found in this post!",
+        };
+      }
+
+      reaction.count++;
+      await post.save();
+
+      return {
+        code: 200,
+        success: true,
+        message: "Reaction count increased successfully!",
+        data: post,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        code: 500,
+        success: false,
+        message: "Internal server error",
+      };
+    }
+  }
+
+  @UseMiddleware(verifyTokenAll)
+  @Mutation(() => PostMutationResponse)
+  async decreaseReactionCount(
+    @Arg("postId") postId: string,
+    @Arg("reactName") reactName: string,
+    @Ctx() { user }: Context
+  ): Promise<PostMutationResponse> {
+    try {
+      // Kiểm tra xem người dùng có tồn tại không
+      const existingUser = await User.findById(user.id);
+      if (!existingUser) {
+        return {
+          code: 404,
+          success: false,
+          message: "User not found!",
+        };
+      }
+
+      const post = await Post.findById(postId);
+      if (!post) {
+        return {
+          code: 404,
+          success: false,
+          message: "Post not found!",
+        };
+      }
+
+      const reaction = post.reactions.find(
+        (reaction) => reaction.name === reactName
+      );
+
+      if (!reaction) {
+        return {
+          code: 404,
+          success: false,
+          message: "Reaction not found in this post!",
+        };
+      }
+
+      if (reaction.count > 0) {
+        reaction.count--;
+      }
+
+      await post.save();
+
+      return {
+        code: 200,
+        success: true,
+        message: "Reaction count decreased successfully!",
+        data: post,
       };
     } catch (error) {
       console.error(error);

@@ -7,7 +7,12 @@ import {
 import connectDB from "./app/utils/connectDB";
 import { buildSchema } from "type-graphql";
 import { ConfigServer } from "./app/config/config";
-import { GreetingResolver, AuthResolver } from "./app/resolvers/index";
+import {
+  GreetingResolver,
+  AuthResolver,
+  ReactionResolver,
+  RelationshipResolver,
+} from "./app/resolvers/index";
 import { app, httpServer } from "./app/app";
 import { PostResolver } from "./app/resolvers/post.resolver";
 
@@ -15,7 +20,13 @@ const main = async () => {
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       validate: false,
-      resolvers: [GreetingResolver, AuthResolver, PostResolver],
+      resolvers: [
+        GreetingResolver,
+        AuthResolver,
+        PostResolver,
+        ReactionResolver,
+        RelationshipResolver,
+      ],
     }),
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),

@@ -3,7 +3,7 @@ import { Response } from "express";
 import { Secret, sign, verify } from "jsonwebtoken";
 import { MiddlewareFn } from "type-graphql";
 import { ConfigJWT, Role } from "../config/config";
-import User, { IUser } from "../models/user/User";
+import User, { IUser } from "../models/user/user.model";
 import { Context } from "../types/Context";
 import { UserAuthPayload } from "../types/UserAuthPayload";
 
@@ -17,7 +17,7 @@ export class Auth {
       checkType
         ? (ConfigJWT.JWT_ACCESS_PRIVATE_KEY as Secret)
         : (ConfigJWT.JWT_REFRESH_PRIVATE_KEY as Secret),
-      { expiresIn: checkType ? "1m" : "10m" }
+      { expiresIn: checkType ? "1d" : "7d" }
     );
 
     return token ?? "";

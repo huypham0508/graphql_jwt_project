@@ -2,7 +2,7 @@ import { Router } from "express";
 import { ConfigJWT, Role } from "../config/config";
 import { Secret, verify } from "jsonwebtoken";
 import { UserAuthPayload } from "../types/UserAuthPayload";
-import User from "../models/user/User";
+import User from "../models/user/user.model";
 import { Auth } from "../middleware/auth";
 import { TokenPayLoad } from "../types/TokenPayload";
 
@@ -22,6 +22,7 @@ refreshToken.get("/", async (req, res): Promise<any> => {
       message: "No refresh token found",
     });
   }
+
   try {
     const decoded = verify(
       refreshToken,
@@ -57,8 +58,8 @@ refreshToken.get("/", async (req, res): Promise<any> => {
     return res.status(200).json({
       success: true,
       message: "Successfully!!!",
-      refreshToken: Auth.sendRefreshToken(res, tokenPayload),
       accessToken: Auth.createToken(ConfigJWT.create_token_type, tokenPayload),
+      // refreshToken: Auth.sendRefreshToken(res, tokenPayload),
     });
   } catch (error) {
     console.log(error);

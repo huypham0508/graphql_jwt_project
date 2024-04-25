@@ -1,7 +1,7 @@
 // import mongoose from "mongoose";
 import { Ctx, Query, Resolver, UseMiddleware } from "type-graphql";
 import { verifyTokenAll } from "../middleware/auth";
-import User from "../models/user/User";
+import User from "../models/user/user.model";
 import { Context } from "../types/Context";
 
 @Resolver()

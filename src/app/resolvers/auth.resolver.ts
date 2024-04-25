@@ -7,7 +7,7 @@ import {
   verifyTokenAll,
   verifyTokenForgotPassword,
 } from "../middleware/auth";
-import User from "../models/user/User";
+import User from "../models/user/user.model";
 
 import generateOTP from "../utils/generateOTP";
 

@@ -1,5 +1,5 @@
 import { Field, ObjectType } from "type-graphql";
-import { IUser } from "../../../models/user/User";
+import { IUser } from "../../../models/user/user.model";
 import { IMutationResponse } from "../MutationResponse";
 
 @ObjectType({ implements: IMutationResponse })

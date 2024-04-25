@@ -1,4 +1,6 @@
 export const handleUpload = (req: any, res: any) => {
+  console.log({ req });
+
   let file = req.files["file"][0];
   if (!file) {
     return res.status(400).json({
