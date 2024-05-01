@@ -178,8 +178,8 @@ export class RelationshipResolver {
         };
       }
 
-      friendRequest.status = FriendStatus.REJECTED;
-      await friendRequest.save();
+      // friendRequest.status = FriendStatus.REJECTED;
+      await friendRequest.deleteOne();
 
       return {
         code: 200,
