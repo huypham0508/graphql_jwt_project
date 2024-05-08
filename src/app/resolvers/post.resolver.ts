@@ -20,9 +20,15 @@ import { FriendStatus } from "../enum/friend.enum";
 @Resolver()
 export class PostResolver {
   @Query((_return) => GetListPostResponse)
-  async allPosts(): Promise<GetListPostResponse> {
+  async allPosts(
+    @Arg("pageSize", { defaultValue: 10 }) pageSize: number,
+    @Arg("pageNumber", { defaultValue: 1 }) pageNumber: number
+  ): Promise<GetListPostResponse> {
     try {
-      const posts = await Post.find().populate("user");
+      const posts = await Post.find()
+        .populate("user")
+        .skip((pageNumber - 1) * pageSize)
+        .limit(pageSize);
 
       if (posts.length == 0) {
         return {
@@ -46,7 +52,11 @@ export class PostResolver {
 
   @UseMiddleware(verifyTokenAll)
   @Query((_return) => GetListPostResponse)
-  async postsOfFriends(@Ctx() { user }: Context): Promise<GetListPostResponse> {
+  async postsOfFriends(
+    @Arg("pageSize", { defaultValue: 10 }) pageSize: number,
+    @Arg("pageNumber", { defaultValue: 1 }) pageNumber: number,
+    @Ctx() { user }: Context
+  ): Promise<GetListPostResponse> {
     try {
       const friends: IFriend[] = await FriendModel.find({
         $or: [
@@ -62,8 +72,11 @@ export class PostResolver {
       });
 
       const postsOfFriends = await Post.find({
-        userId: { $in: friendIds },
-      });
+        user: { $in: friendIds },
+      })
+        .populate("user")
+        .skip((pageNumber - 1) * pageSize)
+        .limit(pageSize);
 
       if (postsOfFriends.length == 0) {
         return {
@@ -82,6 +95,54 @@ export class PostResolver {
       };
     } catch (error) {
       throw new Error("Could not fetch posts of friends");
+    }
+  }
+
+  @UseMiddleware(verifyTokenAll)
+  @Query(() => GetListPostResponse)
+  async yourPosts(
+    @Arg("pageSize", { defaultValue: 10 }) pageSize: number,
+    @Arg("pageNumber", { defaultValue: 1 }) pageNumber: number,
+    @Ctx() { user }: Context
+  ): Promise<GetListPostResponse> {
+    try {
+      // Ensure the user has permission to access the posts
+
+      if (!user.id) {
+        return {
+          code: 403,
+          success: false,
+          message: "Unauthorized access to user's posts!",
+        };
+      }
+
+      const postsOfUser = await Post.find({ user: user.id })
+        .populate("user")
+        .skip((pageNumber - 1) * pageSize)
+        .limit(pageSize);
+
+      if (postsOfUser.length === 0) {
+        return {
+          code: 200,
+          success: true,
+          message: "User has no posts",
+          data: postsOfUser,
+        };
+      }
+
+      return {
+        code: 200,
+        success: true,
+        message: "Get all posts of user",
+        data: postsOfUser,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        code: 500,
+        success: false,
+        message: "Internal server error",
+      };
     }
   }
 

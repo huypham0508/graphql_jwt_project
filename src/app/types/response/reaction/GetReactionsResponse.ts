@@ -1,13 +1,13 @@
 import { Field, ObjectType } from "type-graphql";
 import { IMutationResponse } from "../MutationResponse";
-import { IFriend } from "../../..//models/friend/friend.model";
+import { IReaction } from "../../../models/reaction/reaction.model.ts";
 
 @ObjectType({ implements: IMutationResponse })
-export class GetFriendRequestResponse implements IMutationResponse {
+export class GetReactionsResponse implements IMutationResponse {
   code: number;
   success: boolean;
   message?: string;
 
-  @Field(() => [IFriend], { nullable: true })
-  data?: IFriend[];
+  @Field(() => [IReaction], { nullable: true })
+  data?: IReaction[];
 }

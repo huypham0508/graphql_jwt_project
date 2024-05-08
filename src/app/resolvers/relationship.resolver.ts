@@ -9,31 +9,119 @@ import {
 import { FriendStatus } from "../enum/friend.enum";
 import { verifyTokenAll } from "../middleware/auth";
 import { FriendModel, IFriend } from "../models/friend/friend.model";
-import UserModel from "../models/user/user.model";
+import UserModel, { IUser } from "../models/user/user.model";
 import { Context } from "../types/Context";
+import {
+  FindFriendsResponse,
+  FindUserResponse,
+} from "../types/response/relationship/FindFriendsResponse";
+import { GetFriendsResponse } from "../types/response/relationship/GetFriendResponse";
 import { RelationshipResponse } from "../types/response/relationship/RelationshipResponse";
-import { GetFriendRequestResponse } from "../types/response/relationship/GetFriendRequestResponse";
 
 @Resolver()
 export class RelationshipResolver {
   @UseMiddleware(verifyTokenAll)
-  @Query(() => GetFriendRequestResponse)
+  @Query(() => FindFriendsResponse)
+  async findFriendByEmail(
+    @Arg("email") email: string,
+    @Ctx() { user }: Context
+  ): Promise<FindFriendsResponse> {
+    try {
+      const friendsRequests: IUser[] = await UserModel.find({
+        email: { $regex: email, $options: "i" },
+      })
+        .select("-password")
+        .lean();
+
+      const areFriendPromises = await Promise.all(
+        friendsRequests.map(async (friendUser: any) => {
+          const areFriend = await FriendModel.findOne({
+            $or: [
+              { user: user.id, friend: friendUser._id },
+              { user: friendUser._id, friend: user.id },
+            ],
+          });
+          const status = areFriend ? areFriend.status : "nothing";
+          return status;
+        })
+      );
+
+      const statuses = await Promise.all(areFriendPromises);
+
+      const friendsWithStatus: FindUserResponse[] = friendsRequests.map(
+        (friendUser: any, index) => {
+          const userResponse: FindUserResponse = new FindUserResponse();
+          userResponse.id = friendUser._id ?? "";
+          userResponse.email = friendUser.email;
+          userResponse.userName = friendUser.userName;
+          userResponse.avatar = friendUser.avatar;
+          userResponse.status = statuses[index].toString();
+          return userResponse;
+        }
+      );
+
+      if (friendsRequests) {
+        return {
+          code: 200,
+          success: true,
+          message: "get friend request successfully",
+          data: friendsWithStatus,
+        };
+      }
+
+      return {
+        code: 404,
+        success: false,
+        message: "not found",
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        code: 400,
+        success: false,
+        message: "Error",
+      };
+    }
+  }
+
+  @UseMiddleware(verifyTokenAll)
+  @Query(() => GetFriendsResponse)
   async getFriendRequests(
     @Ctx() { user }: Context
-  ): Promise<GetFriendRequestResponse> {
+  ): Promise<GetFriendsResponse> {
     try {
-      const friendRequests: IFriend[] = await FriendModel.find({
+      const friendsRequests: IFriend[] = await FriendModel.find({
         friend: user.id,
         status: FriendStatus.PENDING,
       })
-        .populate("user")
-        .populate("friend");
+        .populate({
+          path: "user",
+          select: "-password",
+          options: { lean: true },
+        })
+        .populate({
+          path: "friend",
+          select: "-password",
+          options: { lean: true },
+        });
+
+      const formatFriends = friendsRequests
+        .map((relationship) => {
+          const idRelationShip = relationship.id;
+
+          if (relationship.user.id === user.id) {
+            return { ...relationship.friend, id: idRelationShip };
+          } else {
+            return { ...relationship.user, id: idRelationShip };
+          }
+        })
+        .reverse();
 
       return {
         code: 200,
         success: true,
         message: "get friend request successfully",
-        data: friendRequests,
+        data: formatFriends,
       };
     } catch (error) {
       console.error(error);
@@ -41,6 +129,45 @@ export class RelationshipResolver {
         code: 400,
         success: false,
         message: "Could not fetch friend requests",
+      };
+    }
+  }
+
+  @UseMiddleware(verifyTokenAll)
+  @Query(() => GetFriendsResponse)
+  async getFriendList(@Ctx() { user }: Context): Promise<GetFriendsResponse> {
+    try {
+      const friendList = await FriendModel.find({
+        $or: [
+          { user: user.id, status: FriendStatus.ACCEPTED },
+          { friend: user.id, status: FriendStatus.ACCEPTED },
+        ],
+      })
+        .populate("user")
+        .populate("friend");
+
+      const formatFriend = friendList
+        .map((relationship) => {
+          if (relationship.user.id === user.id) {
+            return relationship.friend;
+          } else {
+            return relationship.user;
+          }
+        })
+        .reverse();
+
+      return {
+        code: 200,
+        success: true,
+        message: "Get friend list successfully",
+        data: formatFriend,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        code: 400,
+        success: false,
+        message: "Could not fetch friend list",
       };
     }
   }
@@ -104,6 +231,7 @@ export class RelationshipResolver {
   ): Promise<RelationshipResponse> {
     try {
       const friendRequest = await FriendModel.findById(requestId);
+
       if (!friendRequest) {
         return {
           code: 404,

@@ -18,6 +18,7 @@ export class IPost {
 
   @Field({ nullable: true })
   imageUrl?: string;
+  @Field({ nullable: true })
   description?: string;
 }
 

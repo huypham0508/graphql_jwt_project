@@ -1,14 +1,42 @@
-import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  Mutation,
+  Query,
+  Resolver,
+  UseMiddleware,
+} from "type-graphql";
 import { verifyTokenAll } from "../middleware/auth";
+import Post from "../models/post/post.model";
+import Reaction from "../models/reaction/reaction.model.ts";
 import User from "../models/user/user.model";
 import { Context } from "../types/Context";
-import Reaction from "../models/reaction/reaction.model.ts";
-import { CreateReactionResponse } from "../types/response/reaction/CreateReactionResponse";
 import { CreateReactionInput } from "../types/input/reaction/CreateReactionInput";
-import Post from "../models/post/post.model";
+import { CreateReactionResponse } from "../types/response/reaction/CreateReactionResponse";
+import { GetReactionsResponse } from "../types/response/reaction/GetReactionsResponse";
 
 @Resolver()
 export class ReactionResolver {
+  @Query(() => GetReactionsResponse)
+  async reactions(): Promise<GetReactionsResponse> {
+    try {
+      const reactions = await Reaction.find();
+      return {
+        code: 200,
+        success: true,
+        message: "successfully",
+        data: reactions,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        code: 400,
+        success: false,
+        message: "error",
+      };
+    }
+  }
+
   @UseMiddleware(verifyTokenAll)
   @Mutation(() => CreateReactionResponse)
   async createReaction(
