@@ -68,7 +68,6 @@ export class AuthResolver {
     console.log("login is working...", email);
 
     let hashPassword = "";
-    console.log(await User.find());
 
     const checkAccount = await User.findOne({
       email,

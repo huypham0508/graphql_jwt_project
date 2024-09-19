@@ -24,7 +24,7 @@ export class IFriend {
   status: FriendStatus;
 }
 
-const FriendSchema: Schema = new Schema({
+const FriendSchema: Schema = new Schema<IFriend>({
   user: { type: Schema.Types.ObjectId, ref: "users", required: true },
   friend: { type: Schema.Types.ObjectId, ref: "users", required: true },
   status: {

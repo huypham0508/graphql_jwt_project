@@ -13,6 +13,11 @@ import { handleUpload } from "./controllers/uploadImageController";
 const app = express();
 const httpServer = createServer(app);
 
+// app.use((req: any, _, next) => {
+//   console.log(`Received request: ${req.method} ${req.url}`);
+//   console.log(`User: ${req.body}`);
+//   next();
+// });
 app.use(cors());
 app.use(cookieParser());
 

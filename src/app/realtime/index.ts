@@ -3,30 +3,28 @@ import { Server, Socket } from "socket.io";
 const connectedUsers: Map<string, Socket> = new Map();
 
 const handleRealtimeConnect = async (httpServer: any) => {
-  const io = new Server(httpServer);
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
   try {
     io.on("connection", (socket: Socket) => {
-      // setInterval(() => {
-      //   socket.emit("connected", {
-      //     message: "Connected",
-      //     success: true,
-      //   });
-      // }, 1000);
-
       socket.on("login", (userId: string) => {
         connectedUsers.set(userId, socket);
         console.log(`User ${userId} connected`);
       });
 
-      socket.on("sendNotification", (userId: string, message: string) => {
-        const userSocket = connectedUsers.get(userId);
-        if (userSocket) {
-          userSocket.emit("notification", message);
-          console.log(`Notification sent to user ${userId}: ${message}`);
-        } else {
-          console.log(`User ${userId} is not connected`);
-        }
-      });
+      // socket.on("sendNotification", (userId: string, message: string) => {
+      //   const userSocket = connectedUsers.get(userId);
+      //   if (userSocket) {
+      //     userSocket.emit("notification", message);
+      //     console.log(`Notification sent to user ${userId}: ${message}`);
+      //   } else {
+      //     console.log(`User ${userId} is not connected`);
+      //   }
+      // });
 
       socket.on("disconnect", () => {
         console.log("A client disconnected");
@@ -46,5 +44,5 @@ const handleRealtimeConnect = async (httpServer: any) => {
     console.log({ error });
   }
 };
-
+export { connectedUsers };
 export default handleRealtimeConnect;

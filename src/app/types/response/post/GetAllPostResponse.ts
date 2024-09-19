@@ -1,5 +1,5 @@
 import { Field, ObjectType } from "type-graphql";
-import { IMutationResponse } from "../MutationResponse";
+import { IMutationResponse } from "../IMutationResponse";
 import { IPost } from "../../../models/post/post.model";
 
 @ObjectType({ implements: IMutationResponse })
