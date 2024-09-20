@@ -6,16 +6,16 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
-import { MessageModel } from "../models/chat/message.model";
-import { MessageInput } from "../types/input/chat/MessageInput";
-import { ResponseData } from "../types/response/IMutationResponse";
 import { verifyTokenAll } from "../middleware/auth";
-import { connectedUsers } from "../realtime";
+import { MessageModel } from "../models/chat/message.model";
 import { ChatRoomModel } from "../models/chat/room.model";
 import { Context } from "../types/Context";
-import { MessageResponse } from "../types/response/chat/messageResponse";
-import { GetRoomsResponse } from "../types/response/chat/getRoomResponse";
+import { MessageInput } from "../types/input/chat/MessageInput";
 import { NewMessageInput } from "../types/input/chat/NewMessageInput";
+import { GetRoomsResponse } from "../types/response/chat/GetRoomResponse";
+import { MessageResponse } from "../types/response/chat/MessageResponse";
+import { ResponseData } from "../types/response/IMutationResponse";
+import Helper from "../utils/helper";
 
 @Resolver()
 export class ChatResolver {
@@ -26,9 +26,9 @@ export class ChatResolver {
     @Ctx() { user }: Context
   ): Promise<ResponseData> {
     try {
-      const { content, recipient } = messageInput;
+      const { content, recipientId } = messageInput;
 
-      if (recipient === null) {
+      if (recipientId === null) {
         return {
           success: false,
           code: 404,
@@ -38,7 +38,8 @@ export class ChatResolver {
 
       const newRoom = new ChatRoomModel({
         name: "",
-        participants: [recipient, user.id],
+        newMessage: content,
+        participants: [recipientId, user.id],
       });
       const newMessage = new MessageModel({
         sender: user.id,
@@ -46,12 +47,16 @@ export class ChatResolver {
         room: newRoom._id.toString(),
       });
       await Promise.all([newRoom.save(), newMessage.save()]);
+      // newRoom;
+      // newMessage;
+      // chatObserver.notify({ message: "New message received!" });
 
       //send notification
-      const recipientSocket = connectedUsers.get("messageInput.recipient");
-      if (recipientSocket) {
-        recipientSocket.emit("notification", messageInput.content);
-      }
+      Helper.sendNotification({
+        content,
+        sender: user.id,
+        recipients: [recipientId],
+      });
 
       return {
         success: true,
@@ -76,7 +81,11 @@ export class ChatResolver {
     try {
       const { content, roomId } = messageInput;
 
-      if (roomId === null) {
+      const findRoom = await ChatRoomModel.findById(roomId).populate(
+        "participants"
+      );
+
+      if (findRoom === null) {
         return {
           success: false,
           code: 404,
@@ -89,14 +98,18 @@ export class ChatResolver {
         content,
         room: roomId,
       });
+      findRoom.newMessage = content;
+      findRoom;
+      newMessage;
+      // await findRoom.save();
+      // await newMessage.save();
 
-      await newMessage.save();
-
-      //send notification
-      const recipientSocket = connectedUsers.get("messageInput.recipient");
-      if (recipientSocket) {
-        recipientSocket.emit("notification", messageInput.content);
-      }
+      // send notification
+      Helper.sendNotification({
+        content,
+        recipients: findRoom?.participants,
+        sender: user.id,
+      });
 
       return {
         success: true,
@@ -189,9 +202,15 @@ export class ChatResolver {
     try {
       const newRoom = new ChatRoomModel({
         name: roomName,
+        newMessage: "",
         participants: [...participantIds, user.id],
       });
 
+      Helper.sendNotification({
+        content: "Room created",
+        recipients: participantIds,
+        sender: user.id,
+      });
       await newRoom.save();
 
       return {

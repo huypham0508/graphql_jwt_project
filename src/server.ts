@@ -12,10 +12,10 @@ import {
   AuthResolver,
   ReactionResolver,
   RelationshipResolver,
+  PostResolver,
+  ChatResolver,
 } from "./app/resolvers/index";
 import { app, httpServer } from "./app/app";
-import { PostResolver } from "./app/resolvers/post.resolver";
-import { ChatResolver } from "./app/resolvers/chat.resolver";
 
 const main = async () => {
   const apolloServer = new ApolloServer({

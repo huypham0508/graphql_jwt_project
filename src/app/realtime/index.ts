@@ -1,5 +1,9 @@
 import { Server, Socket } from "socket.io";
 
+export const getReceiverSocketId = (receiverId: string) => {
+  return connectedUsers.get(receiverId);
+};
+
 const connectedUsers: Map<string, Socket> = new Map();
 
 const handleRealtimeConnect = async (httpServer: any) => {
@@ -16,15 +20,10 @@ const handleRealtimeConnect = async (httpServer: any) => {
         console.log(`User ${userId} connected`);
       });
 
-      // socket.on("sendNotification", (userId: string, message: string) => {
-      //   const userSocket = connectedUsers.get(userId);
-      //   if (userSocket) {
-      //     userSocket.emit("notification", message);
-      //     console.log(`Notification sent to user ${userId}: ${message}`);
-      //   } else {
-      //     console.log(`User ${userId} is not connected`);
-      //   }
-      // });
+      socket.on("logout", (userId: string) => {
+        connectedUsers.delete(userId);
+        console.log(`User ${userId} disconnected`);
+      });
 
       socket.on("disconnect", () => {
         console.log("A client disconnected");
@@ -35,7 +34,6 @@ const handleRealtimeConnect = async (httpServer: any) => {
               socket,
             });
             connectedUsers.delete(key);
-            console.log(`User ${key} disconnected`);
           }
         });
       });

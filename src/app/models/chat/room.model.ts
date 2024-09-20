@@ -10,12 +10,16 @@ export class IRoom {
   @Field()
   name: string;
 
+  @Field()
+  newMessage: string;
+
   @Field((_type) => [IUser])
   participants: IUser[];
 }
 
 const chatRoomSchema = new Schema<IRoom>({
   name: { type: String },
+  newMessage: { type: String },
   participants: [{ type: Schema.Types.ObjectId, ref: "users" }],
 });
 
