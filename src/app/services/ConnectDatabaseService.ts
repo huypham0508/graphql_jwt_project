@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { ConfigMongo } from "../config/config";
 
 dotenv.config();
-const connectDB: any = async () => {
+const connectDBService: any = async () => {
   try {
     await mongoose.connect(ConfigMongo.URI_DATABASE, {
       // useCreatendex: true,
@@ -18,4 +18,4 @@ const connectDB: any = async () => {
     process.exit(1);
   }
 };
-export default connectDB;
+export default connectDBService;

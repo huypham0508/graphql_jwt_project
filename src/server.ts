@@ -4,7 +4,7 @@ import {
   ApolloServerPluginDrainHttpServer,
   // ApolloServerPluginLandingPageGraphQLPlayground
 } from "apollo-server-core";
-import connectDB from "./app/utils/connectDB";
+import connectDBService from "./app/services/ConnectDatabaseService";
 import { buildSchema } from "type-graphql";
 import { ConfigServer } from "./app/config/config";
 import {
@@ -39,7 +39,7 @@ const main = async () => {
     },
   });
 
-  await connectDB();
+  await connectDBService();
   await apolloServer.start();
   apolloServer.applyMiddleware({ app });
   httpServer.listen({ port: ConfigServer.PORT }, async () => {

@@ -15,7 +15,7 @@ import { NewMessageInput } from "../types/input/chat/NewMessageInput";
 import { GetRoomsResponse } from "../types/response/chat/GetRoomResponse";
 import { MessageResponse } from "../types/response/chat/MessageResponse";
 import { ResponseData } from "../types/response/IMutationResponse";
-import Helper from "../utils/helper";
+import Socket from "../services/RealtimeService/SocketHelper";
 
 @Resolver()
 export class ChatResolver {
@@ -41,18 +41,18 @@ export class ChatResolver {
         newMessage: content,
         participants: [recipientId, user.id],
       });
+
       const newMessage = new MessageModel({
         sender: user.id,
         content,
         room: newRoom._id.toString(),
       });
-      await Promise.all([newRoom.save(), newMessage.save()]);
-      // newRoom;
-      // newMessage;
-      // chatObserver.notify({ message: "New message received!" });
+      // await Promise.all([newRoom.save(), newMessage.save()]);
+      newRoom;
+      newMessage;
 
       //send notification
-      Helper.sendNotification({
+      Socket.sendNotification({
         content,
         sender: user.id,
         recipients: [recipientId],
@@ -105,7 +105,7 @@ export class ChatResolver {
       // await newMessage.save();
 
       // send notification
-      Helper.sendNotification({
+      Socket.sendNotification({
         content,
         recipients: findRoom?.participants,
         sender: user.id,
@@ -147,6 +147,7 @@ export class ChatResolver {
       throw new Error("Failed to fetch messages");
     }
   }
+
   //rooms
   @UseMiddleware(verifyTokenAll)
   @Query(() => GetRoomsResponse)
@@ -200,23 +201,29 @@ export class ChatResolver {
     @Ctx() { user }: Context
   ): Promise<ResponseData> {
     try {
-      const newRoom = new ChatRoomModel({
+      const newRoom: any = new ChatRoomModel({
         name: roomName,
         newMessage: "",
         participants: [...participantIds, user.id],
       });
+      // await newRoom.save();
 
-      Helper.sendNotification({
+      Socket.sendNotification({
         content: "Room created",
         recipients: participantIds,
         sender: user.id,
       });
-      await newRoom.save();
+
+      Socket.updateRoom({
+        recipients: participantIds,
+        sender: user.id,
+        payload: newRoom.toObject(),
+      });
 
       return {
         success: true,
         code: 200,
-        message: "Room created successfully",
+        message: `Room created successfully ${newRoom}`,
       };
     } catch (error) {
       throw new Error("Failed to create room");
