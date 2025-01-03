@@ -1,13 +1,13 @@
-import { ApolloError, AuthenticationError } from "apollo-server-express";
-import { Response } from "express";
+import { AuthenticationError } from "apollo-server-express";
 import { Secret, sign, verify } from "jsonwebtoken";
 import { MiddlewareFn } from "type-graphql";
 import { ConfigJWT, Role } from "../config/config";
 import User, { IUser } from "../models/user/user.model";
 import { Context } from "../types/Context";
 import { UserAuthPayload } from "../types/UserAuthPayload";
+import { NextFunction, Request, Response } from "express";
 
-export class Auth {
+class Auth {
   public static createToken = (type: ConfigJWT, user: any) => {
     // console.log("creating new token...");
     const checkType = type === ConfigJWT.create_token_type;
@@ -25,7 +25,7 @@ export class Auth {
   public static sendRefreshToken = (res: Response, user: IUser) => {
     // console.log("sending refresh token...");
 
-    const token = Auth.createToken(ConfigJWT.refresh_token_type, user);
+    const token = this.createToken(ConfigJWT.refresh_token_type, user);
 
     res.cookie(ConfigJWT.REFRESH_TOKEN_COOKIE_NAME, token, {
       httpOnly: true,
@@ -36,47 +36,75 @@ export class Auth {
     return token;
   };
 
-  public static verifyToken =
-    (requiredRole: string): MiddlewareFn<Context> =>
-    async ({ context }, next) => {
-      const authHeader = context.req.header("Authorization");
-      const assetToken = authHeader && authHeader.split(" ")[1];
+  public static verifyToken = (requiredRole: string): MiddlewareFn<Context> => async ({ context }, next) => {
+    const authHeader = context.req.header("Authorization");
+    const token = authHeader?.split(" ")[1];
 
-      try {
-        if (!assetToken && assetToken !== "") {
-          throw new AuthenticationError("No token provided");
-        }
+    if (!token) throw new AuthenticationError("No token provided");
 
-        const decodedToken = verify(
-          assetToken,
-          ConfigJWT.JWT_ACCESS_PRIVATE_KEY as Secret
-        ) as UserAuthPayload;
+    const decodedToken = this.decodeAndVerifyToken(token, requiredRole);
 
-        if (decodedToken.role === requiredRole) {
-          const data = await User.findOne({
-            _id: decodedToken.id,
-            email: decodedToken.email,
-          });
+    const user = await this.findUser(decodedToken);
+    if (!user) throw new AuthenticationError("User not found");
 
-          if (!data) {
-            throw new AuthenticationError("Data not found");
-          }
-          if (data && data.tokenVersion != decodedToken.tokenVersion) {
-            throw new AuthenticationError("Token version not match");
-          }
+    context.user = decodedToken;
+    return next();
+  };
 
-          context.user = decodedToken;
-          return next();
-        }
-        throw new AuthenticationError("Unauthorized");
-      } catch (error) {
-        throw new ApolloError("Unauthorized", error);
+  public static verifyTokenRest = (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers.authorization?.toString();
+    const token = authHeader?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ success: false, message: "No token provided" });
+    }
+
+    try {
+      const decodedToken = this.decodeAndVerifyToken(token, Role.ALL);
+      const user = this.findUser(decodedToken);
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
       }
-    };
+      return next();
+    } catch (error) {
+      return res.status(401).json({ success: false, message: error.message });
+    }
+  };
+
+  private static decodeAndVerifyToken = (
+    token: string,
+    requiredRole: string
+  ): UserAuthPayload => {
+    try {
+      const decoded = verify(
+        token,
+        ConfigJWT.JWT_ACCESS_PRIVATE_KEY as Secret
+      ) as UserAuthPayload;
+
+      if (decoded.role !== requiredRole) {
+        throw new AuthenticationError("Unauthorized role");
+      }
+
+      return decoded;
+    } catch (error) {
+      throw new AuthenticationError("Invalid token");
+    }
+  };
+
+  private static findUser = async (decodedToken: UserAuthPayload) => {
+    return User.findOne({
+      _id: decodedToken.id,
+      email: decodedToken.email,
+      tokenVersion: decodedToken.tokenVersion,
+    });
+  };
 }
 
-const verifyTokenForgotPassword = Auth.verifyToken(Role.FORGOT_PASSWORD);
 
+
+const verifyTokenForgotPassword = Auth.verifyToken(Role.FORGOT_PASSWORD);
 const verifyTokenAll = Auth.verifyToken(Role.ALL);
 
-export { verifyTokenAll, verifyTokenForgotPassword };
+
+export { Auth, verifyTokenAll, verifyTokenForgotPassword };
+
