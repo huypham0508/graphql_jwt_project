@@ -6,3 +6,5 @@ export interface Context {
     res: Response,
     user: UserAuthPayload
 }
+
+export type CustomRequest = Request & { user?: UserAuthPayload };

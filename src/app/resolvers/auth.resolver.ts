@@ -9,7 +9,7 @@ import {
 } from "../middleware/auth";
 import User from "../models/user/user.model";
 
-import generateOTP from "../utils/generateOTP";
+import generateOTP from "../utils/generate_otp";
 
 import { ApolloError } from "apollo-server-core";
 import { Context } from "../types/Context";
@@ -19,7 +19,7 @@ import { UpdateUserInput } from "../types/input/user/UpdateUserInput";
 import { ForgotPasswordResponse } from "../types/response/auth/ForgotPasswordResponse";
 import { UserMutationResponse } from "../types/response/user/UserMutationResponse";
 import { TokenPayLoad } from "../types/TokenPayload";
-import sendEmail from "../utils/sendEmail";
+import sendEmail from "../utils/send_email";
 
 @Resolver()
 export class AuthResolver {

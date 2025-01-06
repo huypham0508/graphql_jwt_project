@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { RedisClientOptions } from "redis";
 dotenv.config();
 
 export class ConfigMongo {
@@ -35,4 +36,33 @@ export class Otp {
   public static REDIRECT_URI = "https://developers.google.com/oauthplayground";
   public static MY_EMAIL = process.env.MY_EMAIL;
   public static EXPIRATION_TIME = 2 * 60 * 1000;
+}
+
+export class Redis {
+  public static SAVE_TIME = 1800;
+
+  //connection configuration
+  public static STATUS_REDIS_CONNECT = {
+    "CONNECT": "connect",
+    "END": "end",
+    "RE_CONNECT": "reconnect",
+    "ERROR": "error",
+  };
+  public static REDIS_CONNECT_TIMEOUT = 10000;
+  public static PORT = 19865;
+  public static OPTIONS_PRO: RedisClientOptions = {
+    username: 'admin',
+    password: 'Huy@11072002',
+    socket: {
+        host: 'redis-19865.c295.ap-southeast-1-1.ec2.redns.redis-cloud.com',
+        port: 19865
+    }
+  };
+
+  public static OPTIONS_DEV: RedisClientOptions = {
+    socket: {
+      host: 'localhost',
+      port: 6379,
+    }
+  };
 }

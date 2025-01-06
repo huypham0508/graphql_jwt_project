@@ -1,4 +1,6 @@
-export const handleUpload = (req: any, res: any) => {
+import { Response } from "express";
+
+export const handleUpload = (req: any, res: Response) => {
   console.log({ req });
 
   let file = req.files["file"][0];

@@ -15,7 +15,7 @@ import { NewMessageInput } from "../types/input/chat/NewMessageInput";
 import { GetRoomsResponse } from "../types/response/chat/GetRoomResponse";
 import { MessageResponse } from "../types/response/chat/MessageResponse";
 import { ResponseData } from "../types/response/IMutationResponse";
-import Socket from "../services/RealtimeService/SocketHelper";
+import Socket from "../services/realtime_service/SocketHelper";
 
 @Resolver()
 export class ChatResolver {

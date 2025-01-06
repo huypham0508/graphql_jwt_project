@@ -1,11 +1,14 @@
 import { AuthenticationError } from "apollo-server-express";
+import { NextFunction, Response } from "express";
 import { Secret, sign, verify } from "jsonwebtoken";
 import { MiddlewareFn } from "type-graphql";
+
 import { ConfigJWT, Role } from "../config/config";
+
 import User, { IUser } from "../models/user/user.model";
-import { Context } from "../types/Context";
+
+import { Context, CustomRequest } from "../types/Context";
 import { UserAuthPayload } from "../types/UserAuthPayload";
-import { NextFunction, Request, Response } from "express";
 
 class Auth {
   public static createToken = (type: ConfigJWT, user: any) => {
@@ -51,7 +54,7 @@ class Auth {
     return next();
   };
 
-  public static verifyTokenRest = (req: Request, res: Response, next: NextFunction) => {
+  public static verifyTokenRest = (req: CustomRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization?.toString();
     const token = authHeader?.split(" ")[1];
 
@@ -65,6 +68,7 @@ class Auth {
       if (!user) {
         return res.status(404).json({ success: false, message: "User not found" });
       }
+      req.user = decodedToken;
       return next();
     } catch (error) {
       return res.status(401).json({ success: false, message: error.message });

@@ -4,9 +4,9 @@ import {
   ApolloServerPluginDrainHttpServer,
   // ApolloServerPluginLandingPageGraphQLPlayground
 } from "apollo-server-core";
-import connectDBService from "./app/services/ConnectDatabaseService";
-import {initRedis} from "./app/services/ConnectRedisService";
+import RedisClient from "./app/services/redis_store.service";
 // import { ServerEvents } from "./app/services/ChatEventsService";
+import connectDBService from "./app/services/connect_database.service";
 import { buildSchema } from "type-graphql";
 import { ConfigServer } from "./app/config/config";
 import {
@@ -43,9 +43,11 @@ const main = async () => {
     },
   });
 
+  const redisClient = RedisClient.getInstance();
   await connectDBService();
-  await initRedis();
+  redisClient.connect();
   await apolloServer.start();
+
   // chatEventListener.initialize()
   apolloServer.applyMiddleware({ app });
   httpServer.listen({ port: ConfigServer.PORT }, async () => {

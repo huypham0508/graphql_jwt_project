@@ -10,27 +10,25 @@ import { createServer } from "http";
 // import { ServerEvents } from "./services/ChatEventsService";
 
 import events from "./routes/events";
-import refreshToken from "./routes/refreshToken";
+import refreshToken from "./routes/refresh_token";
 
-import { handleUpload } from "./controllers/uploadImageController";
-import { uploadImage } from "./utils/uploadImage";
 import { Auth } from "./middleware/auth";
+import { uploadImage } from "./utils/uploadImage";
+import { handleUpload } from "./controllers/upload_Image.controller";
 
 const app = express();
 const httpServer = createServer(app);
 
-app.use((req: any, _, next) => {
-  console.log(`Received request: ${req.method} ${req.url}`);
-  console.log(`User: ${req.body}`);
-  next();
-});
+// app.use((req, _, next) => { console.log(`Received request: ${req.method} ${req.url}`); next();});
 app.use(cors());
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use("/public", express.static(path.join(__dirname, "../public")));
 app.use("/refreshToken", refreshToken);
 app.use("/events", Auth.verifyTokenRest, events)
+
 app.post(
   "/upload",
   uploadImage.fields([{ name: "file", maxCount: 1 }]),
