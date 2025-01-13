@@ -67,8 +67,6 @@ export class AuthResolver {
   ): Promise<UserMutationResponse> {
     console.log("login is working...", email);
 
-    let hashPassword = "";
-
     const checkAccount = await User.findOne({
       email,
     });
@@ -83,7 +81,7 @@ export class AuthResolver {
     }
 
     //check password
-    hashPassword = checkAccount?.password ?? "";
+    let hashPassword = checkAccount?.password ?? "";
     const checkPassword = await Bcrypt.comparePassword(password, hashPassword);
 
     if (!checkPassword) {

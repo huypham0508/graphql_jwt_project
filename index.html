@@ -14,88 +14,140 @@
       }
     </style>
     <div class="container">
-      <button id="button">getToken</button>
-      <button id="uploadButton">upload</button>
+      <!-- <button id="button">getToken</button> -->
+      <!-- <button id="uploadButton">upload</button> -->
+       <button id="start_long_polling">Connect to server</button>
     </div>
-    <!-- <script>
-      const button = document.getElementById("button");
-      const API_URL = "http://localhost:4000/graphql";
-      let TOKEN = "";
-      const QUERY = `
-            mutation Mutation($loginInput: LoginInput!) {
-                login(loginInput: $loginInput) {
-                    accessToken
-                    success
-                    message
-                    user {
-                    id
-                    }
-                }
-            }
-        `;
-      const VARIABLES = {
-        loginInput: {
-          email: "k8@gmail.com",
-          password: "123123",
-        },
-      };
+    <script>
+      // const handle_start = async () => {
+        // const url = "http://localhost:4000/events/register"
+        // const token = "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1YzVjMzA4NzQ0ZGM5OTA3MWVkZTQyMiIsImVtYWlsIjoiazhAZ21haWwuY29tIiwidXNlck5hbWUiOiJodXlodXkiLCJ0b2tlblZlcnNpb24iOjEsInJvbGUiOiJBTEwiLCJpYXQiOjE3MzY3Mzg3MDIsImV4cCI6MTczNjgyNTEwMn0.rEFgAbaoApmKTB8xS-UtHKNdgbhAKC47QPEUL4kNCTI"
+        // const response_register = "79cbbf00-044e-4249-8a9a-daf9b28cf711-1736740498413"
+        // for (let index = 0; index < 10000; index++) {
+          // try {
+            // const response_register = await call_api_register(url, token)
+            // console.log({response_register, index});
+            // queue_event(response_register, token)
+          // } catch (error) {
+            // console.error("Error:", error);
+          // }
+        // }
+      // }
 
-      async function fetchGraphQLData() {
-        try {
-          const options = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: QUERY, variables: VARIABLES }),
-          };
+      // const call_api_register = async (url, token) => {
+      //   const options = {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json", "authorization": token},
+      //   };
+      //   const response_register = await fetch(url, options);
+      //   if (!response_register.ok) {
+      //     throw new Error(`Network response was not ok: ${response_register.status}`);
+      //   }
+      //   const data = await response_register.json();
+      //   if (data.errors) {
+      //     throw new Error(
+      //       `GraphQL API returned errors: ${JSON.stringify(data.errors)}`
+      //     );
+      //   }
+      //   return data.queue_id
+      // }
 
-          const response = await fetch(API_URL, options);
+      // const queue_event = async (queue_id, token) => {
+      //   const url = `http://localhost:4000/events?queue_id=${queue_id}&last_event_id=-1`
 
-          if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.status}`);
-          }
+      //   const options = {
+      //     method: "GET",
+      //     headers: { "Content-Type": "application/json", "authorization": token},
+      //   };
+      //   const response_register = await fetch(url, options);
+      //   if (!response_register.ok) {
+      //     throw new Error(`Network response was not ok: ${response_register.status}`);
+      //   }
+      //   const data = await response_register.json();
+      //   console.log({data, queue_id});
+      // }
 
-          const data = await response.json();
+      // const button_start = document.querySelector("#start_long_polling");
+      // button_start.addEventListener("click", () => handle_start())
 
-          if (data.errors) {
-            throw new Error(
-              `GraphQL API returned errors: ${JSON.stringify(data.errors)}`
-            );
-          }
+      // const button = document.getElementById("button");
+      // const API_URL = "http://localhost:4000/graphql";
+      // let TOKEN = "";
+      // const QUERY = `
+      //       mutation Mutation($loginInput: LoginInput!) {
+      //           login(loginInput: $loginInput) {
+      //               accessToken
+      //               success
+      //               message
+      //               user {
+      //               id
+      //               }
+      //           }
+      //       }
+      //   `;
+      // const VARIABLES = {
+      //   loginInput: {
+      //     email: "k8@gmail.com",
+      //     password: "123123",
+      //   },
+      // };
 
-          console.log("Success:", data.data);
-          TOKEN = data.data?.login?.accessToken;
-          // Process the data from `data.data` here
-          // const user = data.data.user;
-          // const posts = user.posts;
+      // async function fetchGraphQLData() {
+      //   try {
+      //     const options = {
+      //       method: "POST",
+      //       headers: { "Content-Type": "application/json" },
+      //       body: JSON.stringify({ query: QUERY, variables: VARIABLES }),
+      //     };
 
-          // You can now use the fetched data (user and posts)
-        } catch (error) {
-          console.error("Error:", error);
-          // Handle errors appropriately, e.g., display error messages to the user
-        }
-      }
+      //     const response = await fetch(API_URL, options);
 
-      const getToken = () => {
-        fetch("http://localhost:4000/refreshToken", {
-          method: "GET",
-          headers: {
-            Authorization: TOKEN, // Add your authorization header here
-            "Content-Type": "application/json", // Include if required by the API
-            // ...other necessary headers
-          },
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            // Process the fetched data here
-            console.log(data);
-          })
-          .catch((error) => {
-            // Handle errors
-            console.error(error);
-          });
-      };
-      button.addEventListener("click", () => getToken());
-      fetchGraphQLData();
-    </script> -->
+      //     if (!response.ok) {
+      //       throw new Error(`Network response was not ok: ${response.status}`);
+      //     }
+
+      //     const data = await response.json();
+
+      //     if (data.errors) {
+      //       throw new Error(
+      //         `GraphQL API returned errors: ${JSON.stringify(data.errors)}`
+      //       );
+      //     }
+
+      //     console.log("Success:", data.data);
+      //     TOKEN = data.data?.login?.accessToken;
+      //     // Process the data from `data.data` here
+      //     // const user = data.data.user;
+      //     // const posts = user.posts;
+
+      //     // You can now use the fetched data (user and posts)
+      //   } catch (error) {
+      //     console.error("Error:", error);
+      //     // Handle errors appropriately, e.g., display error messages to the user
+      //   }
+      // }
+
+      // const getToken = () => {
+      //   fetch("http://localhost:4000/refreshToken", {
+      //     method: "GET",
+      //     headers: {
+      //       Authorization: TOKEN, // Add your authorization header here
+      //       "Content-Type": "application/json", // Include if required by the API
+      //       // ...other necessary headers
+      //     },
+      //   })
+      //     .then((response) => response.json())
+      //     .then((data) => {
+      //       // Process the fetched data here
+      //       console.log(data);
+      //     })
+      //     .catch((error) => {
+      //       // Handle errors
+      //       console.error(error);
+      //     });
+      // };
+      // button.addEventListener("click", () => getToken());
+      // fetchGraphQLData();
+    </script>
   </body>
 </html>

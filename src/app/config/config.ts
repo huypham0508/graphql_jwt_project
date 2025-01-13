@@ -48,7 +48,7 @@ export class Redis {
     "RE_CONNECT": "reconnect",
     "ERROR": "error",
   };
-  public static REDIS_CONNECT_TIMEOUT = 10000;
+  public static REDIS_CONNECT_TIMEOUT = 30000;
   public static PORT = 19865;
   public static OPTIONS_PRO: RedisClientOptions = {
     username: 'admin',

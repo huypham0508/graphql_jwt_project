@@ -14,7 +14,7 @@ import refreshToken from "./routes/refresh_token";
 
 import { Auth } from "./middleware/auth";
 import { uploadImage } from "./utils/uploadImage";
-import { handleUpload } from "./controllers/upload_Image.controller";
+import { handleUpload } from "./controllers/upload_image.controller";
 
 const app = express();
 const httpServer = createServer(app);

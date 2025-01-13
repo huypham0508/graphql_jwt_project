@@ -66,4 +66,7 @@ class RedisStorage {
     }
 }
 
-export default RedisStorage
+const redisStorage = RedisStorage.getInstance()
+export {RedisStorage, redisStorage}
+
+

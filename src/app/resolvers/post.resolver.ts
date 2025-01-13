@@ -6,17 +6,16 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
+import { FriendStatus } from "../enum/friend.enum";
 import { verifyTokenAll } from "../middleware/auth";
+import { FriendModel, IFriend } from "../models/friend/friend.model";
 import Post from "../models/post/post.model";
+import Reaction from "../models/reaction/reaction.model.ts";
 import User from "../models/user/user.model";
 import { Context } from "../types/Context";
 import { CreatePostInput } from "../types/input/post/createPostInput";
 import { GetListPostResponse } from "../types/response/post/GetAllPostResponse";
 import { PostMutationResponse } from "../types/response/post/PostMutationResponse";
-import Reaction from "../models/reaction/reaction.model.ts";
-import { FriendModel, IFriend } from "../models/friend/friend.model";
-import { FriendStatus } from "../enum/friend.enum";
-import { doEvents } from "../controllers/events.controller";
 
 @Resolver()
 export class PostResolver {
@@ -108,16 +107,6 @@ export class PostResolver {
   ): Promise<GetListPostResponse> {
     try {
       // Ensure the user has permission to access the posts
-      doEvents({
-        id: null,
-        type: "post",
-        data: {
-          user: user.id,
-          imageUrl: "imageUrl",
-          description: "description",
-          reactions: "postReactions",
-        }
-      })
       if (!user.id) {
         return {
           code: 403,

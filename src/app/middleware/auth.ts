@@ -26,10 +26,8 @@ class Auth {
     return token ?? "";
   };
   public static sendRefreshToken = (res: Response, user: IUser) => {
-    // console.log("sending refresh token...");
-
+    console.log("sending refresh token...");
     const token = this.createToken(ConfigJWT.refresh_token_type, user);
-
     res.cookie(ConfigJWT.REFRESH_TOKEN_COOKIE_NAME, token, {
       httpOnly: true,
       secure: true,

@@ -1,6 +1,7 @@
 import { Schema, model } from "mongoose";
 import { Field, ID, ObjectType } from "type-graphql";
 import { IUser } from "../user/user.model";
+import { IMessage } from "./message.model";
 
 @ObjectType()
 export class IRoom {
@@ -10,8 +11,8 @@ export class IRoom {
   @Field()
   name: string;
 
-  @Field()
-  newMessage: string;
+  @Field(() => IMessage)
+  newMessage: Omit<IMessage, "room">;
 
   @Field((_type) => [IUser])
   participants: IUser[];
@@ -19,8 +20,8 @@ export class IRoom {
 
 const chatRoomSchema = new Schema<IRoom>({
   name: { type: String },
-  newMessage: { type: String },
-  participants: [{ type: Schema.Types.ObjectId, ref: "users" }],
+  newMessage: {  type: Schema.Types.ObjectId, ref: "messages", require: true  },
+  participants: [{ type: Schema.Types.ObjectId, ref: "users", require: true }],
 });
 
 export const ChatRoomModel = model("chatRooms", chatRoomSchema);
