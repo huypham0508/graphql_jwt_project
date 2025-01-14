@@ -1,9 +1,8 @@
 import { Arg, Ctx, ID, Mutation, Resolver, UseMiddleware } from "type-graphql";
-
 import { Bcrypt } from "../bcrypt/index";
 import { ConfigJWT, Otp, Role } from "../config/config";
 import {
-  Auth,
+  AuthMiddleware,
   verifyTokenAll,
   verifyTokenForgotPassword,
 } from "../middleware/auth";
@@ -28,11 +27,9 @@ export class AuthResolver {
     @Arg("registerInput")
     registerInput: RegisterInput
   ): Promise<UserMutationResponse> {
-    // console.log("register is working...");
     const { email, userName, password, avatar } = registerInput;
-    const existingUser = await User.findOne({
-      email,
-    });
+
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return {
         code: 400,
@@ -46,11 +43,11 @@ export class AuthResolver {
       userName,
       password: hashedPassword,
       avatar: avatar,
-      tokenVersion: 0,
       otp: undefined,
       otpExpirationTime: undefined,
     });
     await newUser.save();
+
     return {
       code: 200,
       success: true,
@@ -66,12 +63,10 @@ export class AuthResolver {
     @Ctx() { res }: Context
   ): Promise<UserMutationResponse> {
     console.log("login is working...", email);
-
     const checkAccount = await User.findOne({
       email,
-    });
+    }).populate("role");
 
-    //check email
     if (!checkAccount) {
       return {
         code: 400,
@@ -80,7 +75,6 @@ export class AuthResolver {
       };
     }
 
-    //check password
     let hashPassword = checkAccount?.password ?? "";
     const checkPassword = await Bcrypt.comparePassword(password, hashPassword);
 
@@ -96,17 +90,17 @@ export class AuthResolver {
       id: checkAccount._id,
       email: checkAccount.email,
       userName: checkAccount.userName,
-      tokenVersion: checkAccount.tokenVersion ?? 0,
-      role: Role.ALL,
+      tokenPermissions: Role.ALL,
+      role: checkAccount.role,
     };
 
-    const refreshToken = Auth.sendRefreshToken(res, userModel);
+    const refreshToken = AuthMiddleware.sendRefreshToken(res, userModel);
 
     return {
       code: 200,
       success: true,
       message: "Logged in successfully!!!",
-      accessToken: Auth.createToken(ConfigJWT.create_token_type, userModel),
+      accessToken: AuthMiddleware.createToken(ConfigJWT.create_token_type, userModel),
       refreshToken: refreshToken ?? "",
       user: {
         id: checkAccount._id,
@@ -114,6 +108,7 @@ export class AuthResolver {
         userName: checkAccount.userName,
         password: "",
         avatar: checkAccount.avatar,
+        role: checkAccount.role
       },
     };
   }
@@ -139,10 +134,10 @@ export class AuthResolver {
       text: `Your OTP for password reset is: ${otp}`,
     };
 
-    await sendEmail(mailOptions);
+    sendEmail(mailOptions);
     const expirationTime = Date.now() + Otp.EXPIRATION_TIME;
 
-    await User.updateOne(
+    User.updateOne(
       { _id: user.id, email: email },
       { otp: otp, otpExpirationTime: expirationTime }
     );
@@ -194,11 +189,11 @@ export class AuthResolver {
       id: user._id,
       email: user.email,
       userName: user.userName,
-      tokenVersion: user.tokenVersion ?? 0,
-      role: Role.FORGOT_PASSWORD,
+      tokenPermissions: Role.FORGOT_PASSWORD,
+      role: user.role
     };
 
-    const token = Auth.createToken(ConfigJWT.create_token_type, tokenPayLoad);
+    const token = AuthMiddleware.createToken(ConfigJWT.create_token_type, tokenPayLoad);
 
     return {
       code: 200,
@@ -222,15 +217,11 @@ export class AuthResolver {
 
     try {
       const hashedPassword = await Bcrypt.hashPassword(newPassword);
-      // const versionPlus = !isNaN(Number(user.tokenVersion))
-      //   ? user.tokenVersion! + 1
-      //   : 0;
 
       await User.updateOne(
         { _id: user.id, email: payloadVerify.email },
         {
           password: hashedPassword,
-          // tokenVersion: versionPlus,
         }
       );
       return {
@@ -252,7 +243,6 @@ export class AuthResolver {
     @Arg("id", (_type) => ID) id: any,
     @Ctx() { res }: Context
   ): Promise<UserMutationResponse> {
-    // console.log("logout is working...");
     const existingUser = await User.findOne({
       _id: id,
     });
@@ -263,11 +253,6 @@ export class AuthResolver {
         message: "Error !!!",
       };
     }
-    const versionPlus =
-      existingUser.tokenVersion !== undefined
-        ? existingUser.tokenVersion + 1
-        : 0;
-    existingUser.tokenVersion = versionPlus;
     existingUser.token = "";
     await existingUser.save();
     //clear cookie

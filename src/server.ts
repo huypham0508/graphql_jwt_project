@@ -4,35 +4,18 @@ import {
   ApolloServerPluginDrainHttpServer,
   // ApolloServerPluginLandingPageGraphQLPlayground
 } from "apollo-server-core";
-import {RedisStorage} from "./app/services/redis_store.service";
-import connectDBService from "./app/services/connect_database.service";
-import { buildSchema } from "type-graphql";
-import { ConfigServer } from "./app/config/config";
-import {
-  GreetingResolver,
-  AuthResolver,
-  ReactionResolver,
-  RelationshipResolver,
-  PostResolver,
-  ChatResolver,
-} from "./app/resolvers/index";
-import { app, httpServer } from "./app/app";
 
-// const chatEventListener = ServerEvents.getInstance();
+import buildSchema from "./app/resolvers/index"
+
+import redis from "./app/services/redis_store.service";
+import connect_database from "./app/services/connect_database.service";
+
+import { ConfigServer } from "./app/config/config";
+import { app, httpServer } from "./app/app";
 
 const main = async () => {
   const apolloServer = new ApolloServer({
-    schema: await buildSchema({
-      validate: false,
-      resolvers: [
-        GreetingResolver,
-        AuthResolver,
-        PostResolver,
-        ReactionResolver,
-        RelationshipResolver,
-        ChatResolver,
-      ],
-    }),
+    schema: await buildSchema,
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),
       // ApolloServerPluginLandingPageGraphQLPlayground
@@ -42,11 +25,10 @@ const main = async () => {
     },
   });
 
-  const redisClient = RedisStorage.getInstance();
-  await connectDBService();
-  redisClient.connect();
-  await apolloServer.start();
+  await connect_database();
+  await redis.RedisStorage.getInstance().connect();
 
+  await apolloServer.start();
   apolloServer.applyMiddleware({ app });
   httpServer.listen({ port: ConfigServer.PORT }, async () => {
     console.log(

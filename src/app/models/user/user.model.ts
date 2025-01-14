@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { Field, ID, ObjectType } from "type-graphql";
+import { IRole } from "../role/role.model";
+
 const Schema = mongoose.Schema;
 const model = mongoose.model;
 
@@ -7,6 +9,9 @@ const model = mongoose.model;
 export class IUser {
   @Field((_type) => ID)
   id: any;
+
+  @Field((_type) => IRole)
+  role: IRole;
 
   @Field()
   userName: string;
@@ -20,11 +25,15 @@ export class IUser {
   token?: string;
   otp?: string;
   otpExpirationTime?: number;
-  tokenVersion?: number;
 }
 
 export const UserSchema = new Schema<IUser>(
   {
+    role: {
+      type: Schema.Types.ObjectId,
+      ref: "roles",
+      required: true,
+    },
     email: {
       type: String,
       require: true,
@@ -48,10 +57,6 @@ export const UserSchema = new Schema<IUser>(
     },
     otpExpirationTime: {
       type: Number,
-    },
-    tokenVersion: {
-      type: Number,
-      require: true,
     },
   },
   { timestamps: true }

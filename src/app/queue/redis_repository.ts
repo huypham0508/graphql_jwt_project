@@ -1,6 +1,6 @@
 import { RedisClientType } from "redis";
 
-import { redisStorage } from "../services/redis_store.service";
+import redis from "../services/redis_store.service";
 
 import { Event, RedisSession } from "src/app/types/system/Events";
 
@@ -8,7 +8,7 @@ class RedisRepository {
     private TIME_SESSION = 1800;
 
     private getRedisInstance(): RedisClientType {
-        return redisStorage.getStorage();
+        return redis.redisStorage.getStorage();
     }
 
     /**

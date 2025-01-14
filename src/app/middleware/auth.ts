@@ -10,10 +10,10 @@ import User, { IUser } from "../models/user/user.model";
 import { Context, CustomRequest } from "../types/Context";
 import { UserAuthPayload } from "../types/UserAuthPayload";
 
-class Auth {
-  public static createToken = (type: ConfigJWT, user: any) => {
-    // console.log("creating new token...");
+class AuthMiddleware{
+  public static createToken = (type: ConfigJWT, user: IUser) => {
     const checkType = type === ConfigJWT.create_token_type;
+    console.log({user});
 
     let token = sign(
       user,
@@ -37,7 +37,8 @@ class Auth {
     return token;
   };
 
-  public static verifyToken = (requiredRole: string): MiddlewareFn<Context> => async ({ context }, next) => {
+  public static verifyToken = (requiredRole: string): MiddlewareFn<Context> => async ({ context, info }, next) => {
+    console.log({info});
     const authHeader = context.req.header("Authorization");
     const token = authHeader?.split(" ")[1];
 
@@ -73,6 +74,11 @@ class Auth {
     }
   };
 
+  public static checkRoles = (): MiddlewareFn<Context> => async (_ ,next) => {
+    // console.log({info, context});
+    return next();
+  };
+
   private static decodeAndVerifyToken = (
     token: string,
     requiredRole: string
@@ -104,9 +110,10 @@ class Auth {
 
 
 
-const verifyTokenForgotPassword = Auth.verifyToken(Role.FORGOT_PASSWORD);
-const verifyTokenAll = Auth.verifyToken(Role.ALL);
+const verifyTokenForgotPassword = AuthMiddleware.verifyToken(Role.FORGOT_PASSWORD);
+const verifyTokenAll = AuthMiddleware.verifyToken(Role.ALL);
+const checkRolesMiddleware = AuthMiddleware.checkRoles();
 
 
-export { Auth, verifyTokenAll, verifyTokenForgotPassword };
+export { AuthMiddleware, verifyTokenAll, verifyTokenForgotPassword, checkRolesMiddleware };
 

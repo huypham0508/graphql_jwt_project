@@ -12,12 +12,9 @@ export class ConfigServer {
 export class ConfigJWT {
   public static create_token_type: string = "createToken";
   public static refresh_token_type: string = "refreshToken";
-  public static JWT_ACCESS_PRIVATE_KEY: any =
-    process.env.JWT_ACCESS_PRIVATE_KEY;
-  public static JWT_REFRESH_PRIVATE_KEY: any =
-    process.env.JWT_REFRESH_PRIVATE_KEY;
-  public static REFRESH_TOKEN_COOKIE_NAME: any =
-    process.env.REFRESH_TOKEN_COOKI_NAME;
+  public static JWT_ACCESS_PRIVATE_KEY: any = process.env.JWT_ACCESS_PRIVATE_KEY;
+  public static JWT_REFRESH_PRIVATE_KEY: any = process.env.JWT_REFRESH_PRIVATE_KEY;
+  public static REFRESH_TOKEN_COOKIE_NAME: any = process.env.REFRESH_TOKEN_COOKI_NAME;
 }
 
 export class Role {

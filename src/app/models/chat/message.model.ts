@@ -17,6 +17,12 @@ export class IMessage {
 
   @Field(() => IRoom)
   room: IRoom;
+
+  @Field()
+  createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
 }
 
 const MessageSchema: Schema = new Schema<IMessage>({
@@ -25,6 +31,8 @@ const MessageSchema: Schema = new Schema<IMessage>({
     type: String,
   },
   room: { type: Schema.Types.ObjectId, ref: "chatRooms", required: true },
+}, {
+  timestamps: true,
 });
 
 export const MessageModel = mongoose.model<IMessage>("messages", MessageSchema);

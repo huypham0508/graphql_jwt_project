@@ -27,9 +27,9 @@ export class ChatResolver {
     @Ctx() { user }: Context
   ): Promise<SendNewMessageResponse> {
     try {
-      const { content, name, recipientIds } = messageInput;
+      const { content, name, recipientId } = messageInput;
 
-      if (recipientIds === null) {
+      if (recipientId === null) {
         return {
           success: false,
           code: 404,
@@ -37,12 +37,10 @@ export class ChatResolver {
         };
       }
 
-      const removeCurrentId = recipientIds.filter((id) => id !== user.id)
-
       let newRoom = new ChatRoomModel({
         name: name ?? "",
         newMessage: "",
-        participants: [...removeCurrentId, user.id],
+        participants: [recipientId, user.id],
       });
 
       let newMessage = new MessageModel({
@@ -50,16 +48,18 @@ export class ChatResolver {
         content,
         room: newRoom._id.toString(),
       });
-      newRoom.newMessage = newMessage
+      newRoom.newMessage = newMessage;
 
       await Promise.all([newMessage.save(), newRoom.save()]);
 
-      await (await newRoom.populate({
-        path: "newMessage",
-        populate: {
-          path: "sender",
-        },
-      })).populate({
+      await (
+        await newRoom.populate({
+          path: "newMessage",
+          populate: {
+            path: "sender",
+          },
+        })
+      ).populate({
         path: "participants",
       });
 
@@ -68,8 +68,8 @@ export class ChatResolver {
         eventData: {
           type: "message",
           event: newRoom,
-          recipients: [recipientIds],
-        }
+          recipients: [recipientId],
+        },
       });
 
       return {
@@ -163,7 +163,6 @@ export class ChatResolver {
     }
   }
 
-  //rooms
   @UseMiddleware(verifyTokenAll)
   @Query(() => GetRoomsResponse)
   async getAllRooms(@Ctx() { user }: Context): Promise<GetRoomsResponse> {
@@ -216,12 +215,28 @@ export class ChatResolver {
     @Ctx() { user }: Context
   ): Promise<ResponseData> {
     try {
-      const newRoom: any = new ChatRoomModel({
+      if (participantIds.length < 1) {
+        return {
+          success: false,
+          code: 404,
+          message: "recipients is required",
+        };
+      }
+
+      const newRoom = new ChatRoomModel({
         name: roomName,
         newMessage: "",
         participants: [...participantIds, user.id],
       });
-      // await newRoom.save();
+      const newMessage = new MessageModel({
+        sender: user.id,
+        content: `${user.userName} has been created successfully`,
+        room: newRoom._id.toString(),
+      });
+      newRoom.newMessage = newMessage;
+      newRoom.populate("newMessage");
+
+      // await Promise.all([newMessage.save(), newRoom.save()]);
 
       // Socket.sendNotification({
       //   content: "Room created",
@@ -238,7 +253,7 @@ export class ChatResolver {
       return {
         success: true,
         code: 200,
-        message: `Room created successfully ${newRoom}`,
+        message: `Room created successfully ${newRoom.name}`,
       };
     } catch (error) {
       throw new Error("Failed to create room");

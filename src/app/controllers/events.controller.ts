@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import {redisRepository} from "../queue/redis_repository";
 
-import {connectionManager} from "../queue/connection.service";
+import {connectionManager} from "../queue/connection";
 
 import { CustomRequest } from "../types/Context";
 import { Event, RedisSession } from "../types/system/Events";

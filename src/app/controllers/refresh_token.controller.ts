@@ -4,7 +4,7 @@ import { Secret, verify } from "jsonwebtoken";
 import { ConfigJWT, Role } from "../config/config";
 import { UserAuthPayload } from "../types/UserAuthPayload";
 import User from "../models/user/user.model";
-import { Auth } from "../middleware/auth";
+import { AuthMiddleware } from "../middleware/auth";
 import { TokenPayLoad } from "../types/TokenPayload";
 
 const handleRefreshToken = async (req: Request, res: Response): Promise<any> => {
@@ -39,26 +39,19 @@ const handleRefreshToken = async (req: Request, res: Response): Promise<any> => 
             });
         }
 
-        if (decoded.tokenVersion !== existingUser.tokenVersion) {
-            return res.status(401).json({
-                success: false,
-                message: "Token Version exp",
-            });
-        }
-
         const tokenPayload: TokenPayLoad = {
             id: existingUser._id,
             email: existingUser.email,
             userName: existingUser.userName,
-            tokenVersion: existingUser.tokenVersion ?? 0,
-            role: Role.ALL,
+            tokenPermissions: Role.ALL,
+            role: existingUser.role,
         };
 
-        const newRefreshToken = Auth.sendRefreshToken(res, tokenPayload);
+        const newRefreshToken = AuthMiddleware.sendRefreshToken(res, tokenPayload);
         return res.status(200).json({
             success: true,
             message: "Successfully!!!",
-            accessToken: Auth.createToken(ConfigJWT.create_token_type, tokenPayload),
+            accessToken: AuthMiddleware.createToken(ConfigJWT.create_token_type, tokenPayload),
             newRefreshToken,
         });
     } catch (error) {

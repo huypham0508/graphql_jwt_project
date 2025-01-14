@@ -12,7 +12,7 @@ export class IRoom {
   name: string;
 
   @Field(() => IMessage)
-  newMessage: Omit<IMessage, "room">;
+  newMessage: IMessage;
 
   @Field((_type) => [IUser])
   participants: IUser[];
