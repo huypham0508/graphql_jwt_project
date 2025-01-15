@@ -1,11 +1,12 @@
 export interface Event {
-    event: any,
-    id?: number | any,
-    recipients: any[]  | "all"
-    type: 'message' | 'updated' | 'post',
+  event: any;
+  id?: number | any;
+  recipients: any[] | "all";
+  type: "message" | "room" | "post" | "user";
+  op: "add" | "remove" | "update";
 }
 
 export interface RedisSession {
-    user_id: number,
-    queue_id: string,
+  user_id: number;
+  queue_id: string;
 }

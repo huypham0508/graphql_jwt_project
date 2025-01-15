@@ -23,4 +23,4 @@ export default buildSchema({
     ChatResolver,
   ],
   globalMiddlewares: [AuthorizationMiddleware]
-})
+});

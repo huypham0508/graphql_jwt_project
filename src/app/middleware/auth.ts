@@ -27,6 +27,7 @@ class AuthMiddleware{
 
     return token ?? "";
   };
+
   public static sendRefreshToken = (res: Response, user: IUser) => {
     console.log("sending refresh token...");
     const token = this.createToken(ConfigJWT.refresh_token_type, user);
@@ -86,10 +87,11 @@ class AuthMiddleware{
         if (publicFunctions.includes(fieldName)) {
           return next();
         }
-        const parentName = this.getParent(info.fieldName, parentTypeName)
+        const parentName = this.getParentClass(info.fieldName, parentTypeName)
         if (publicFunctions.includes(parentName)) {
           return next();
         }
+
         const authHeader = req.headers.authorization?.toString();
         const token = authHeader?.split(" ")[1];
         if (!token) throw new Error("No token provided");
@@ -102,11 +104,15 @@ class AuthMiddleware{
           throw new Error("Role not found");
         }
 
-        if (!userRole.permissions.includes(fieldName)) {
-          throw new Error("You do not have permission to access this resource");
+        if (userRole.permissions.includes(parentName)) {
+          return next();
         }
 
-        return next();
+        if (!userRole.permissions.includes(fieldName)) {
+          return next();
+        }
+
+        throw new Error("You do not have permission to access this resource");
       }
       return next();
     } catch (error) {
@@ -114,7 +120,7 @@ class AuthMiddleware{
     }
   };
 
-  private static getParent(fieldName: string, parentTypeName: string): string | any {
+  private static getParentClass(fieldName: string, parentTypeName: string): string | any {
     const metadata = (global as any).TypeGraphQLMetadataStorage as MetadataStorage;
     switch (parentTypeName) {
       case "Query":

@@ -21,6 +21,7 @@ export class IUser {
 
   @Field({ nullable: true })
   avatar?: string;
+
   password?: string;
   token?: string;
   otp?: string;

@@ -63,11 +63,11 @@ export class ChatResolver {
         path: "participants",
       });
 
-      // send notification
       doEvents({
         eventData: {
           type: "message",
-          event: newRoom,
+          op: "add",
+          event: newMessage,
           recipients: [recipientId],
         },
       });
@@ -96,9 +96,7 @@ export class ChatResolver {
     try {
       const { content, roomId } = messageInput;
 
-      const findRoom = await ChatRoomModel.findById(roomId).populate(
-        "participants"
-      );
+      const findRoom = await ChatRoomModel.findById(roomId);
 
       if (findRoom === null) {
         return {
@@ -114,17 +112,18 @@ export class ChatResolver {
         room: roomId,
       });
       findRoom.newMessage = newMessage;
-      findRoom;
-      newMessage;
-      // await findRoom.save();
-      // await newMessage.save();
 
-      // send notification
-      // Socket.sendNotification({
-      //   content,
-      //   recipients: findRoom?.participants,
-      //   sender: user.id,
-      // });
+      await Promise.all([findRoom.save(), newMessage.save()]);
+
+      const recipients = findRoom.participants.map((id) => id.toString())
+      doEvents({
+        eventData: {
+          type: "message",
+          op: "add",
+          event: newMessage,
+          recipients: recipients.filter((participant) => participant !== user.id),
+        },
+      });
 
       return {
         success: true,
@@ -228,6 +227,7 @@ export class ChatResolver {
         newMessage: "",
         participants: [...participantIds, user.id],
       });
+
       const newMessage = new MessageModel({
         sender: user.id,
         content: `${user.userName} has been created successfully`,
@@ -236,19 +236,17 @@ export class ChatResolver {
       newRoom.newMessage = newMessage;
       newRoom.populate("newMessage");
 
-      // await Promise.all([newMessage.save(), newRoom.save()]);
+      await Promise.all([newMessage.save(), newRoom.save()]);
 
-      // Socket.sendNotification({
-      //   content: "Room created",
-      //   recipients: participantIds,
-      //   sender: user.id,
-      // });
-
-      // Socket.updateRoom({
-      //   recipients: participantIds,
-      //   sender: user.id,
-      //   payload: newRoom.toObject(),
-      // });
+      const recipients = [...participantIds, user.id]
+      doEvents({
+        eventData: {
+          type: "room",
+          op: "add",
+          event: newRoom,
+          recipients: recipients.filter((participant) => participant !== user.id),
+        },
+      });
 
       return {
         success: true,

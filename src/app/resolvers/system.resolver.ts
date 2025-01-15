@@ -10,7 +10,7 @@ import { RolesResponse } from "../types/response/system/RolesResponse";
 @Resolver()
 export class SystemResolver {
   @Query((_return) => AllResolverResponse)
-  // @UseMiddleware(VerifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   async allResolvers(@Ctx() _: Context): Promise<AllResolverResponse> {
     const metadata = (global as any).TypeGraphQLMetadataStorage as MetadataStorage;
     const queries = metadata.queries.map((q) => ({
@@ -38,21 +38,21 @@ export class SystemResolver {
   }
 
   @Query((_return) => RolesResponse)
-  // @UseMiddleware(VerifyTokenAll)
-  async Roles(): Promise<RolesResponse> {
+  @UseMiddleware(VerifyTokenAll)
+  async roles(): Promise<RolesResponse> {
     try {
       const roles = await Role.find();
       if (roles.length == 0) {
         return {
           code: 200,
           success: true,
-          message: "post is empty",
+          message: "roles is empty",
         };
       }
       return {
         code: 200,
         success: true,
-        message: "get all posts",
+        message: "successfully",
         data: roles,
       };
     } catch (error) {
