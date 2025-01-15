@@ -7,7 +7,9 @@ import { RelationshipResolver } from "./relationship.resolver";
 import { ChatResolver } from "./chat.resolver";
 import { PostResolver } from "./post.resolver";
 import {SystemResolver} from "./system.resolver";
-import { checkRolesMiddleware } from "../middleware/auth";
+import { AuthorizationMiddleware } from "../middleware/auth";
+
+export const publicFunctions = ["AuthResolver"];
 
 export default buildSchema({
   validate: false,
@@ -20,5 +22,5 @@ export default buildSchema({
     RelationshipResolver,
     ChatResolver,
   ],
-  globalMiddlewares: [checkRolesMiddleware]
+  globalMiddlewares: [AuthorizationMiddleware]
 })

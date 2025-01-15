@@ -1,17 +1,17 @@
-import "reflect-metadata";
-import { ApolloServer } from "apollo-server-express";
 import {
   ApolloServerPluginDrainHttpServer,
-  // ApolloServerPluginLandingPageGraphQLPlayground
 } from "apollo-server-core";
+import { ApolloServer } from "apollo-server-express";
+import "reflect-metadata";
 
-import buildSchema from "./app/resolvers/index"
+import buildSchema from "./app/resolvers/index";
 
-import redis from "./app/services/redis_store.service";
 import connect_database from "./app/services/connect_database.service";
+import redis from "./app/services/redis_store.service";
 
-import { ConfigServer } from "./app/config/config";
 import { app, httpServer } from "./app/app";
+import { ConfigServer } from "./app/config/config";
+import initializeModels from "./app/models/init_data";
 
 const main = async () => {
   const apolloServer = new ApolloServer({
@@ -26,6 +26,7 @@ const main = async () => {
   });
 
   await connect_database();
+  await initializeModels();
   await redis.RedisStorage.getInstance().connect();
 
   await apolloServer.start();

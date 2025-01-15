@@ -6,7 +6,7 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
-import { verifyTokenAll } from "../middleware/auth";
+import { VerifyTokenAll } from "../middleware/auth";
 import Post from "../models/post/post.model";
 import Reaction from "../models/reaction/reaction.model.ts";
 import User from "../models/user/user.model";
@@ -37,7 +37,7 @@ export class ReactionResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Mutation(() => CreateReactionResponse)
   async createReaction(
     @Arg("reactionInput") reactionInput: CreateReactionInput,

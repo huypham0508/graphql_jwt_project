@@ -7,7 +7,7 @@ import {
   UseMiddleware,
 } from "type-graphql";
 import { FriendStatus } from "../enum/friend.enum";
-import { verifyTokenAll } from "../middleware/auth";
+import { VerifyTokenAll } from "../middleware/auth";
 import { FriendModel, IFriend } from "../models/friend/friend.model";
 import UserModel, { IUser } from "../models/user/user.model";
 import { Context } from "../types/Context";
@@ -20,7 +20,7 @@ import { RelationshipResponse } from "../types/response/relationship/Relationshi
 
 @Resolver()
 export class RelationshipResolver {
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Query(() => FindFriendsResponse)
   async findFriendByEmail(
     @Arg("email") email: string,
@@ -84,7 +84,7 @@ export class RelationshipResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Query(() => GetFriendsResponse)
   async getFriendRequests(
     @Ctx() { user }: Context
@@ -133,7 +133,7 @@ export class RelationshipResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Query(() => GetFriendsResponse)
   async getFriendList(@Ctx() { user }: Context): Promise<GetFriendsResponse> {
     try {
@@ -172,7 +172,7 @@ export class RelationshipResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Mutation(() => RelationshipResponse)
   async sendFriendRequest(
     @Arg("friendId") friendId: string,
@@ -223,7 +223,7 @@ export class RelationshipResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Mutation(() => RelationshipResponse)
   async acceptFriendRequest(
     @Arg("requestId") requestId: string,
@@ -274,7 +274,7 @@ export class RelationshipResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Mutation(() => RelationshipResponse)
   async rejectedFriendRequest(
     @Arg("requestId") requestId: string,
@@ -324,7 +324,7 @@ export class RelationshipResolver {
     }
   }
 
-  // @UseMiddleware(verifyTokenAll)
+  // @UseMiddleware(VerifyTokenAll)
   // @Mutation(() => RelationshipResponse)
   // async areFriends(
   //   @Arg("userId") userId: string,

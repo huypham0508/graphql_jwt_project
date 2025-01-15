@@ -8,7 +8,7 @@ const model = mongoose.model;
 @ObjectType()
 export class IRole {
   @Field((_type) => ID)
-  id: string;
+  id: any;
 
   @Field()
   name: string;
@@ -24,6 +24,26 @@ const RoleSchema = new Schema<IRole>(
   },
   { timestamps: true }
 );
-
 const RoleModel = model<IRole>("roles", RoleSchema);
+
+export const initializeRoles = async () => {
+  try {
+    const roles = await RoleModel.find({});
+    if (roles.length === 0) {
+      console.log("No roles found, creating default roles...");
+
+      const defaultRoles = [
+        { name: "admin", permissions: [] },
+        { name: "member", permissions: [] },
+      ];
+
+      await RoleModel.insertMany(defaultRoles);
+      console.log("Default roles created successfully.");
+    } else {
+      console.log("Roles already exist.");
+    }
+  } catch (error) {
+    console.error("Error initializing roles:", error);
+  }
+};
 export default RoleModel;

@@ -4,6 +4,6 @@ export interface TokenPayLoad {
   id: any;
   email: string;
   userName: string;
-  tokenPermissions: string;
   role: IRole,
+  tokenPermissions: string;
 }

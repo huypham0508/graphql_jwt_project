@@ -6,7 +6,7 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
-import { verifyTokenAll } from "../middleware/auth";
+import { VerifyTokenAll } from "../middleware/auth";
 import { MessageModel } from "../models/chat/message.model";
 import { ChatRoomModel } from "../models/chat/room.model";
 import { Context } from "../types/Context";
@@ -20,7 +20,7 @@ import { doEvents } from "../controllers/events.controller";
 
 @Resolver()
 export class ChatResolver {
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Mutation(() => SendNewMessageResponse)
   async sendNewMessage(
     @Arg("newMessageInput") messageInput: NewMessageInput,
@@ -87,7 +87,7 @@ export class ChatResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Mutation(() => ResponseData)
   async sendMessage(
     @Arg("messageInput") messageInput: MessageInput,
@@ -140,7 +140,7 @@ export class ChatResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Query(() => MessageResponse)
   async getMessagesByRoomId(
     @Arg("roomId") roomId: string
@@ -163,7 +163,7 @@ export class ChatResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Query(() => GetRoomsResponse)
   async getAllRooms(@Ctx() { user }: Context): Promise<GetRoomsResponse> {
     try {
@@ -207,7 +207,7 @@ export class ChatResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Mutation(() => ResponseData)
   async createRoom(
     @Arg("participantIds", () => [String]) participantIds: string[],

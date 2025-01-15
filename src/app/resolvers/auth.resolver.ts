@@ -3,8 +3,8 @@ import { Bcrypt } from "../bcrypt/index";
 import { ConfigJWT, Otp, Role } from "../config/config";
 import {
   AuthMiddleware,
-  verifyTokenAll,
-  verifyTokenForgotPassword,
+  VerifyTokenAll,
+  VerifyTokenForgotPassword,
 } from "../middleware/auth";
 import User from "../models/user/user.model";
 
@@ -19,6 +19,7 @@ import { ForgotPasswordResponse } from "../types/response/auth/ForgotPasswordRes
 import { UserMutationResponse } from "../types/response/user/UserMutationResponse";
 import { TokenPayLoad } from "../types/TokenPayload";
 import sendEmail from "../utils/send_email";
+import RoleModel from "../models/role/role.model";
 
 @Resolver()
 export class AuthResolver {
@@ -37,6 +38,9 @@ export class AuthResolver {
         message: "Email already exists!!!",
       };
     }
+
+    const defaultRole = await RoleModel.findOne({ name: "member" });
+
     const hashedPassword = await Bcrypt.hashPassword(password);
     const newUser = new User({
       email,
@@ -45,6 +49,7 @@ export class AuthResolver {
       avatar: avatar,
       otp: undefined,
       otpExpirationTime: undefined,
+      role: defaultRole,
     });
     await newUser.save();
 
@@ -87,7 +92,7 @@ export class AuthResolver {
     }
 
     const userModel: TokenPayLoad = {
-      id: checkAccount._id,
+      id: checkAccount.id,
       email: checkAccount.email,
       userName: checkAccount.userName,
       tokenPermissions: Role.ALL,
@@ -203,7 +208,7 @@ export class AuthResolver {
     };
   }
 
-  @UseMiddleware(verifyTokenForgotPassword)
+  @UseMiddleware(VerifyTokenForgotPassword)
   @Mutation((_return) => ForgotPasswordResponse)
   async resetPassword(
     @Arg("newPassword") newPassword: string,
@@ -269,7 +274,7 @@ export class AuthResolver {
     };
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Mutation((_return) => UserMutationResponse)
   async updateUser(
     @Arg("updateUserInput") updateUserInput: UpdateUserInput,

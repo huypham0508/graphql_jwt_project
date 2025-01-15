@@ -1,22 +1,18 @@
-import { Ctx, Query, Resolver, UseMiddleware } from "type-graphql";
+import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
 import { MetadataStorage } from "type-graphql/dist/metadata/metadata-storage";
-import { verifyTokenAll } from "../middleware/auth";
-import User from "../models/user/user.model";
+import { VerifyTokenAll } from "../middleware/auth";
+import Role from "../models/role/role.model";
 import { Context } from "../types/Context";
+import { ResponseData } from "../types/response/IMutationResponse";
 import { AllResolverResponse } from "../types/response/system/AllResolverResponse";
+import { RolesResponse } from "../types/response/system/RolesResponse";
 
 @Resolver()
 export class SystemResolver {
   @Query((_return) => AllResolverResponse)
-  @UseMiddleware(verifyTokenAll)
-  async allResolvers(@Ctx() context: Context): Promise<AllResolverResponse> {
-    const id = context.user.id;
-    const data = await User.findOne({
-      _id: id,
-    });
-    console.log(data?.userName);
-    const metadata = (global as any)
-      .TypeGraphQLMetadataStorage as MetadataStorage;
+  // @UseMiddleware(VerifyTokenAll)
+  async allResolvers(@Ctx() _: Context): Promise<AllResolverResponse> {
+    const metadata = (global as any).TypeGraphQLMetadataStorage as MetadataStorage;
     const queries = metadata.queries.map((q) => ({
       name: q.methodName,
       resolver: q.target.name,
@@ -39,5 +35,71 @@ export class SystemResolver {
       success: true,
       data: [...queries, ...mutations, ...subscriptions],
     };
+  }
+
+  @Query((_return) => RolesResponse)
+  // @UseMiddleware(VerifyTokenAll)
+  async Roles(): Promise<RolesResponse> {
+    try {
+      const roles = await Role.find();
+      if (roles.length == 0) {
+        return {
+          code: 200,
+          success: true,
+          message: "post is empty",
+        };
+      }
+      return {
+        code: 200,
+        success: true,
+        message: "get all posts",
+        data: roles,
+      };
+    } catch (error) {
+      throw new Error("Could not fetch posts");
+    }
+  }
+
+
+  @UseMiddleware(VerifyTokenAll)
+  @Mutation(() => ResponseData)
+  async addPermissionToRole(
+    @Arg("roleId") roleId: string,
+    @Arg("permission") permission: string
+  ): Promise<ResponseData> {
+    try {
+      const role = await Role.findById(roleId);
+      if (!role) {
+        return {
+          success: false,
+          code: 404,
+          message: "Role not found",
+        };
+      }
+
+      if (role.permissions.includes(permission)) {
+        return {
+          success: false,
+          code: 400,
+          message: "Permission already exists",
+        };
+      }
+
+      role.permissions.push(permission);
+      await role.save();
+
+      return {
+        success: true,
+        code: 200,
+        message: "Permission added successfully",
+      };
+    } catch (error) {
+      console.error("Error adding permission to role:", error);
+      return {
+        success: false,
+        code: 500,
+        message: "Internal server error",
+      };
+    }
   }
 }

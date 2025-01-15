@@ -7,7 +7,7 @@ import {
   UseMiddleware,
 } from "type-graphql";
 import { FriendStatus } from "../enum/friend.enum";
-import { verifyTokenAll } from "../middleware/auth";
+import { VerifyTokenAll } from "../middleware/auth";
 import { FriendModel, IFriend } from "../models/friend/friend.model";
 import Post from "../models/post/post.model";
 import Reaction from "../models/reaction/reaction.model.ts";
@@ -50,7 +50,7 @@ export class PostResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Query((_return) => GetListPostResponse)
   async postsOfFriends(
     @Arg("pageSize", { defaultValue: 10 }) pageSize: number,
@@ -98,7 +98,7 @@ export class PostResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Query(() => GetListPostResponse)
   async yourPosts(
     @Arg("pageSize", { defaultValue: 10 }) pageSize: number,
@@ -145,7 +145,7 @@ export class PostResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Mutation(() => PostMutationResponse)
   async createPost(
     @Arg("postInput") postInput: CreatePostInput,
@@ -194,7 +194,7 @@ export class PostResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Mutation(() => PostMutationResponse)
   async increaseReactionCount(
     @Arg("postId") postId: string,
@@ -251,7 +251,7 @@ export class PostResolver {
     }
   }
 
-  @UseMiddleware(verifyTokenAll)
+  @UseMiddleware(VerifyTokenAll)
   @Mutation(() => PostMutationResponse)
   async decreaseReactionCount(
     @Arg("postId") postId: string,
