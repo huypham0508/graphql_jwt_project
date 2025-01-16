@@ -8,6 +8,7 @@ import { ChatResolver } from "./chat.resolver";
 import { PostResolver } from "./post.resolver";
 import {SystemResolver} from "./system.resolver";
 import { AuthorizationMiddleware } from "../middleware/auth";
+import { RateLimitMiddleware } from "../middleware/rate_limited";
 
 export const publicFunctions = ["AuthResolver"];
 
@@ -22,5 +23,5 @@ export default buildSchema({
     RelationshipResolver,
     ChatResolver,
   ],
-  globalMiddlewares: [AuthorizationMiddleware]
+  globalMiddlewares: [AuthorizationMiddleware, RateLimitMiddleware]
 });

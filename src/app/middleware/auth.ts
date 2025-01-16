@@ -97,9 +97,12 @@ class AuthMiddleware{
         if (!token) throw new Error("No token provided");
 
         const user: any = this.decodeToken(token);
+
         if (!user) throw new Error("User not found");
 
-        const userRole = await RoleModel.findById(user.role._id);
+        const roleId = user?.role
+        const userRole = await RoleModel.findById(roleId);
+
         if (!userRole) {
           throw new Error("Role not found");
         }

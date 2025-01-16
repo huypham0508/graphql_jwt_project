@@ -1,4 +1,4 @@
-import { Arg, Ctx, ID, Mutation, Resolver, UseMiddleware } from "type-graphql";
+import { Arg, Ctx, ID, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
 import { Bcrypt } from "../bcrypt/index";
 import { ConfigJWT, Otp, Role } from "../config/config";
 import {
@@ -6,11 +6,12 @@ import {
   VerifyTokenAll,
   VerifyTokenForgotPassword,
 } from "../middleware/auth";
-import User from "../models/user/user.model";
+import User, { IUser } from "../models/user/user.model";
 
 import generateOTP from "../utils/generate_otp";
 
 import { ApolloError } from "apollo-server-core";
+import RoleModel from "../models/role/role.model";
 import { Context } from "../types/Context";
 import { LoginInput } from "../types/input/user/LoginInput";
 import { RegisterInput } from "../types/input/user/RegisterInput";
@@ -19,10 +20,16 @@ import { ForgotPasswordResponse } from "../types/response/auth/ForgotPasswordRes
 import { UserMutationResponse } from "../types/response/user/UserMutationResponse";
 import { TokenPayLoad } from "../types/TokenPayload";
 import sendEmail from "../utils/send_email";
-import RoleModel from "../models/role/role.model";
 
 @Resolver()
 export class AuthResolver {
+  @Query((_return) => [IUser])
+  @UseMiddleware(VerifyTokenAll)
+  async getUsers(@Ctx() _: Context): Promise<IUser[]> {
+    const data = await User.find();
+    return data;
+  }
+
   @Mutation((_return) => UserMutationResponse)
   async register(
     @Arg("registerInput")
@@ -61,6 +68,7 @@ export class AuthResolver {
     };
   }
 
+
   @Mutation((_return) => UserMutationResponse)
   async login(
     @Arg("loginInput")
@@ -70,7 +78,7 @@ export class AuthResolver {
     console.log("login is working...", email);
     const checkAccount = await User.findOne({
       email,
-    }).populate("role");
+    });
 
     if (!checkAccount) {
       return {
@@ -98,6 +106,8 @@ export class AuthResolver {
       tokenPermissions: Role.ALL,
       role: checkAccount.role,
     };
+
+
 
     const refreshToken = AuthMiddleware.sendRefreshToken(res, userModel);
 
@@ -142,10 +152,11 @@ export class AuthResolver {
     sendEmail(mailOptions);
     const expirationTime = Date.now() + Otp.EXPIRATION_TIME;
 
-    User.updateOne(
+    await User.updateOne(
       { _id: user.id, email: email },
       { otp: otp, otpExpirationTime: expirationTime }
     );
+
 
     return {
       code: 200,
