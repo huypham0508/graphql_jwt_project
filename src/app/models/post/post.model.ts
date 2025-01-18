@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import { Field, ID, ObjectType } from "type-graphql";
 import { IReaction, reactionSchema } from "../reaction/reaction.model.ts";
 import { IUser } from "../user/user.model";
+import ModelName from "../../constants/model_name";
+
 const Schema = mongoose.Schema;
 const model = mongoose.model;
 
@@ -24,7 +26,7 @@ export class IPost {
 
 export const PostSchema = new Schema<IPost>(
   {
-    user: { type: Schema.Types.ObjectId, ref: "users", required: true },
+    user: { type: Schema.Types.ObjectId, ref: ModelName.USER, required: true },
     imageUrl: {
       type: String,
     },
@@ -36,5 +38,5 @@ export const PostSchema = new Schema<IPost>(
   { timestamps: true }
 );
 
-const PostModel = model<IPost>("post", PostSchema);
+const PostModel = model<IPost>(ModelName.POST, PostSchema);
 export default PostModel;

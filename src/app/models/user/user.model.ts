@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Field, ID, ObjectType } from "type-graphql";
 import { IRole } from "../role/role.model";
+import ModelName from "../../constants/model_name";
 
 const Schema = mongoose.Schema;
 const model = mongoose.model;
@@ -19,6 +20,9 @@ export class IUser {
   @Field()
   email: string;
 
+  @Field()
+  isActive?: boolean;
+
   @Field({ nullable: true })
   avatar?: string;
 
@@ -30,6 +34,7 @@ export class IUser {
 
 export const UserSchema = new Schema<IUser>(
   {
+
     role: {
       type: Schema.Types.ObjectId,
       ref: "roles",
@@ -50,6 +55,11 @@ export const UserSchema = new Schema<IUser>(
       type: String,
       require: true,
     },
+    isActive: {
+      type: Boolean,
+      required: true,
+      default: false
+    },
     token: {
       type: String,
     },
@@ -63,5 +73,5 @@ export const UserSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-const UserModel = model<IUser>("users", UserSchema);
+const UserModel = model<IUser>(ModelName.USER, UserSchema);
 export default UserModel;

@@ -3,6 +3,7 @@ import mongoose, { Schema } from "mongoose";
 import { registerEnumType, Field, ID, ObjectType } from "type-graphql";
 import { IUser } from "../user/user.model";
 import { FriendStatus } from "../..//enum/friend.enum";
+import ModelName from "../../constants/model_name";
 
 registerEnumType(FriendStatus, {
   name: "FriendStatus",
@@ -25,8 +26,8 @@ export class IFriend {
 }
 
 const FriendSchema: Schema = new Schema<IFriend>({
-  user: { type: Schema.Types.ObjectId, ref: "users", required: true },
-  friend: { type: Schema.Types.ObjectId, ref: "users", required: true },
+  user: { type: Schema.Types.ObjectId, ref: ModelName.USER, required: true },
+  friend: { type: Schema.Types.ObjectId, ref: ModelName.USER, required: true },
   status: {
     type: String,
     enum: Object.values(FriendStatus),
@@ -34,4 +35,4 @@ const FriendSchema: Schema = new Schema<IFriend>({
   },
 });
 
-export const FriendModel = mongoose.model<IFriend>("friend", FriendSchema);
+export const FriendModel = mongoose.model<IFriend>(ModelName.FRIEND, FriendSchema);

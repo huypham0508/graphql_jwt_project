@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import nodemailer from "nodemailer";
-import { Otp } from "../config/config";
+import { Otp } from "../constants/config";
 interface MailOptionsType {
   from?: string;
   to: string;

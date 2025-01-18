@@ -2,6 +2,7 @@ import { Schema, model } from "mongoose";
 import { Field, ID, ObjectType } from "type-graphql";
 import { IUser } from "../user/user.model";
 import { IMessage } from "./message.model";
+import ModelName from "../../constants/model_name";
 
 @ObjectType()
 export class IRoom {
@@ -12,7 +13,7 @@ export class IRoom {
   name: string;
 
   @Field(() => IMessage)
-  newMessage: IMessage;
+  maxMessage: IMessage;
 
   @Field((_type) => [IUser])
   participants: IUser[];
@@ -20,8 +21,8 @@ export class IRoom {
 
 const chatRoomSchema = new Schema<IRoom>({
   name: { type: String },
-  newMessage: {  type: Schema.Types.ObjectId, ref: "messages", require: true  },
-  participants: [{ type: Schema.Types.ObjectId, ref: "users", require: true }],
+  maxMessage: {  type: Schema.Types.ObjectId, ref: ModelName.MESSAGE, require: true  },
+  participants: [{ type: Schema.Types.ObjectId, ref: ModelName.USER, require: true }],
 });
 
-export const ChatRoomModel = model("chatRooms", chatRoomSchema);
+export const ChatRoomModel = model(ModelName.CHAT_ROOM, chatRoomSchema);

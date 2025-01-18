@@ -84,6 +84,8 @@ export const handleEvents = async(req: CustomRequest, res: Response): Promise<vo
 
 export const doEvents = (data: {eventData: Event}) => {
   const {eventData} = data
+  console.log({eventData});
+
   try {
     connectionManager.doEvents(eventData)
   } catch (error) {

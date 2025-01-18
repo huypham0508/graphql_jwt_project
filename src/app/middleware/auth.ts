@@ -3,7 +3,7 @@ import { NextFunction, Response } from "express";
 import { decode, Secret, sign, verify } from "jsonwebtoken";
 import { MiddlewareFn } from "type-graphql";
 
-import { ConfigJWT, Role } from "../config/config";
+import { ConfigJWT, Role } from "../constants/config";
 
 import User, { IUser } from "../models/user/user.model";
 
@@ -52,7 +52,7 @@ class AuthMiddleware{
     if (!user) throw new AuthenticationError("User not found");
 
     context.user = decodedToken;
-    return next();
+    return await next();
   };
 
   public static verifyTokenRest = (req: CustomRequest, res: Response, next: NextFunction) => {

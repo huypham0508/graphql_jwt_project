@@ -1,0 +1,27 @@
+{
+  "Email not found!": "Email not found!",
+  "User not found!": "User not found!",
+  "User updated successfully": "User updated successfully",
+  "Password error!": "Password error!",
+  "Logged in successfully!": "Logged in successfully!",
+  "Email already exists!": "Email already exists!",
+  "User registered successfully!": "User registered successfully!",
+  "Your OTP for password reset is: {{otp}}": "Your OTP for password reset is: {{otp}}",
+  "OTP sent to your email. Please check your inbox.": "OTP sent to your email. Please check your inbox.",
+  "OTP not match": "OTP not match",
+  "OTP expired": "OTP expired",
+  "OTP submitted successfully.": "OTP submitted successfully.",
+  "Password reset successfully.": "Password reset successfully.",
+  "Logged out successfully!": "Logged out successfully!",
+
+  "Recipient not found!" : "Recipient not found!",
+  "Recipients is required!" : "Recipients is required!",
+  "Message sent successfully!" : "Message sent successfully!",
+  "Failed to send message": "Failed to send message",
+  "Room does not exist!": "Room does not exist!",
+  "Failed to fetch messages": "Failed to fetch messages",
+  "{{userName}} has been created successfully": "{{userName}} has been created successfully",
+  "Room created successfully {{name}}": "Room created successfully {{name}}",
+  "roomId is required": "roomId is required",
+  "Room not found": "Room not found"
+}

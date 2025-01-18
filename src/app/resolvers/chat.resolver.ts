@@ -6,6 +6,7 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
+import { doEvents } from "../controllers/events.controller";
 import { VerifyTokenAll } from "../middleware/auth";
 import { MessageModel } from "../models/chat/message.model";
 import { ChatRoomModel } from "../models/chat/room.model";
@@ -14,9 +15,8 @@ import { MessageInput } from "../types/input/chat/MessageInput";
 import { NewMessageInput } from "../types/input/chat/NewMessageInput";
 import { GetRoomsResponse } from "../types/response/chat/GetRoomResponse";
 import { MessageResponse } from "../types/response/chat/MessageResponse";
-import { ResponseData } from "../types/response/IMutationResponse";
 import { SendNewMessageResponse } from "../types/response/chat/SendNewMessageResponse";
-import { doEvents } from "../controllers/events.controller";
+import { ResponseData } from "../types/response/IMutationResponse";
 
 @Resolver()
 export class ChatResolver {
@@ -24,7 +24,7 @@ export class ChatResolver {
   @Mutation(() => SendNewMessageResponse)
   async sendNewMessage(
     @Arg("newMessageInput") messageInput: NewMessageInput,
-    @Ctx() { user }: Context
+    @Ctx() { req, user }: Context
   ): Promise<SendNewMessageResponse> {
     try {
       const { content, name, recipientId } = messageInput;
@@ -33,41 +33,48 @@ export class ChatResolver {
         return {
           success: false,
           code: 404,
-          message: "recipient not found!",
+          message: req.t("Recipient not found!"),
         };
       }
 
       let newRoom = new ChatRoomModel({
         name: name ?? "",
-        newMessage: "",
+        maxMessage: "",
         participants: [recipientId, user.id],
       });
 
-      let newMessage = new MessageModel({
+      let maxMessage = new MessageModel({
         sender: user.id,
         content,
         room: newRoom._id.toString(),
       });
-      newRoom.newMessage = newMessage;
 
-      await Promise.all([newMessage.save(), newRoom.save()]);
+      await maxMessage.save();
+      newRoom.maxMessage = maxMessage;
+      await newRoom.save();
 
       await (
         await newRoom.populate({
-          path: "newMessage",
+          path: "maxMessage",
           populate: {
             path: "sender",
+            populate: {
+              path: "role",
+            }
           },
         })
       ).populate({
         path: "participants",
+        populate: {
+          path: "role",
+        }
       });
 
       doEvents({
         eventData: {
           type: "message",
           op: "add",
-          event: newMessage,
+          event: maxMessage,
           recipients: [recipientId],
         },
       });
@@ -76,13 +83,13 @@ export class ChatResolver {
         success: true,
         code: 200,
         room: newRoom,
-        message: "Message sent successfully!",
+        message: req.t("Message sent successfully!"),
       };
     } catch (error) {
       return {
         success: false,
         code: 404,
-        message: "Failed to send message",
+        message: req.t("Failed to send message"),
       };
     }
   }
@@ -91,7 +98,7 @@ export class ChatResolver {
   @Mutation(() => ResponseData)
   async sendMessage(
     @Arg("messageInput") messageInput: MessageInput,
-    @Ctx() { user }: Context
+    @Ctx() { req, user }: Context
   ): Promise<ResponseData> {
     try {
       const { content, roomId } = messageInput;
@@ -102,25 +109,25 @@ export class ChatResolver {
         return {
           success: false,
           code: 404,
-          message: "Room does not exist!",
+          message: req.t("Room does not exist!"),
         };
       }
 
-      const newMessage = new MessageModel({
+      const maxMessage = new MessageModel({
         sender: user.id,
         content,
         room: roomId,
       });
-      findRoom.newMessage = newMessage;
+      findRoom.maxMessage = maxMessage;
 
-      await Promise.all([findRoom.save(), newMessage.save()]);
+      await Promise.all([findRoom.save(), maxMessage.save()]);
 
       const recipients = findRoom.participants.map((id) => id.toString())
       doEvents({
         eventData: {
           type: "message",
           op: "add",
-          event: newMessage,
+          event: maxMessage,
           recipients: recipients.filter((participant) => participant !== user.id),
         },
       });
@@ -128,13 +135,13 @@ export class ChatResolver {
       return {
         success: true,
         code: 200,
-        message: "Message sent successfully!",
+        message: req.t("Message sent successfully!"),
       };
     } catch (error) {
       return {
         success: false,
         code: 404,
-        message: "Failed to send message",
+        message: req.t("Failed to send message"),
       };
     }
   }
@@ -142,33 +149,37 @@ export class ChatResolver {
   @UseMiddleware(VerifyTokenAll)
   @Query(() => MessageResponse)
   async getMessagesByRoomId(
-    @Arg("roomId") roomId: string
+    @Arg("roomId") roomId: string,
+    @Ctx() {req}: Context
   ): Promise<MessageResponse> {
     try {
       const messages = await MessageModel.find({
         room: roomId,
       })
         .sort({ timestamp: 1 })
-        .populate(["room", "sender"]);
+        .populate({path: "room", populate: {path: "participants"}})
+        .populate({path: "sender", populate: {path: "role"}});
 
       return {
         success: true,
         code: 200,
-        message: "Message sent successfully!",
+        message: req.t("Successfully!"),
         data: messages,
       };
     } catch (error) {
-      throw new Error("Failed to fetch messages");
+      throw new Error(req.t("Failed to fetch messages"));
     }
   }
 
   @UseMiddleware(VerifyTokenAll)
   @Query(() => GetRoomsResponse)
-  async getAllRooms(@Ctx() { user }: Context): Promise<GetRoomsResponse> {
+  async getAllRooms(@Ctx() { req, user }: Context): Promise<GetRoomsResponse> {
     try {
       const rooms = await ChatRoomModel.find({
         participants: user.id,
-      }).populate("participants");
+      })
+      .populate({path: "participants", populate: {path: "role"}})
+      .populate({path: "maxMessage", populate: {path: "sender"}});
 
       const filteredRooms = rooms.map((room) => {
         let name: string = "";
@@ -189,10 +200,10 @@ export class ChatResolver {
           name = filteredParticipants[0].userName ?? "";
         }
         return {
-          ...room.toObject(),
           id: room._id.toString(),
           name: name,
           participants: filteredParticipants,
+          maxMessage: room.maxMessage,
         };
       });
 
@@ -202,7 +213,7 @@ export class ChatResolver {
         data: filteredRooms,
       };
     } catch (error) {
-      throw new Error("Failed to fetch rooms");
+      throw new Error(req.t("Failed to fetch rooms"));
     }
   }
 
@@ -211,32 +222,32 @@ export class ChatResolver {
   async createRoom(
     @Arg("participantIds", () => [String]) participantIds: string[],
     @Arg("roomName") roomName: string,
-    @Ctx() { user }: Context
+    @Ctx() { req, user }: Context
   ): Promise<ResponseData> {
     try {
       if (participantIds.length < 1) {
         return {
           success: false,
           code: 404,
-          message: "recipients is required",
+          message: req.t("Recipients is required!"),
         };
       }
 
       const newRoom = new ChatRoomModel({
         name: roomName,
-        newMessage: "",
+        maxMessage: "",
         participants: [...participantIds, user.id],
       });
 
-      const newMessage = new MessageModel({
+      const maxMessage = new MessageModel({
         sender: user.id,
-        content: `${user.userName} has been created successfully`,
+        content: req.t("{{userName}} has been created successfully", {"userName": user.userName}),
         room: newRoom._id.toString(),
       });
-      newRoom.newMessage = newMessage;
-      newRoom.populate("newMessage");
+      newRoom.maxMessage = maxMessage;
+      newRoom.populate("maxMessage");
 
-      await Promise.all([newMessage.save(), newRoom.save()]);
+      await Promise.all([maxMessage.save(), newRoom.save()]);
 
       const recipients = [...participantIds, user.id]
       doEvents({
@@ -251,7 +262,7 @@ export class ChatResolver {
       return {
         success: true,
         code: 200,
-        message: `Room created successfully ${newRoom.name}`,
+        message: req.t("Room created successfully {{name}}", { name: roomName}),
       };
     } catch (error) {
       throw new Error("Failed to create room");

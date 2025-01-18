@@ -1,6 +1,6 @@
 import { buildSchema } from "type-graphql";
 
-import { GreetingResolver } from "./greeting.resolver";
+import { EmitEventResolver } from "./greeting.resolver";
 import { AuthResolver } from "./auth.resolver";
 import { ReactionResolver } from "./reaction.resolver";
 import { RelationshipResolver } from "./relationship.resolver";
@@ -16,7 +16,7 @@ export default buildSchema({
   validate: false,
   resolvers: [
     SystemResolver,
-    GreetingResolver,
+    EmitEventResolver,
     AuthResolver,
     PostResolver,
     ReactionResolver,

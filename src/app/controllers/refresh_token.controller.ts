@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Secret, verify } from "jsonwebtoken";
 
-import { ConfigJWT, Role } from "../config/config";
+import { ConfigJWT, Role } from "../constants/config";
 import { UserAuthPayload } from "../types/UserAuthPayload";
 import User from "../models/user/user.model";
 import { AuthMiddleware } from "../middleware/auth";

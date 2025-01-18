@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { ConfigBcrypt } from "../config/config";
+import { ConfigBcrypt } from "../constants/config";
 
 export class Bcrypt {
     public static hashPassword(plaintextPassword: string) {

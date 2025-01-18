@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import ModelName from "../../constants/model_name";
 import { Field, ID, ObjectType } from "type-graphql";
 
 const Schema = mongoose.Schema;
@@ -24,7 +25,7 @@ const RoleSchema = new Schema<IRole>(
   },
   { timestamps: true }
 );
-const RoleModel = model<IRole>("roles", RoleSchema);
+const RoleModel = model<IRole>(ModelName.ROLE, RoleSchema);
 
 export const initializeRoles = async () => {
   try {

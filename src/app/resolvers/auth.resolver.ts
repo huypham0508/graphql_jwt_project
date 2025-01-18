@@ -1,6 +1,6 @@
 import { Arg, Ctx, ID, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
 import { Bcrypt } from "../bcrypt/index";
-import { ConfigJWT, Otp, Role } from "../config/config";
+import { ConfigJWT, Otp, Role } from "../constants/config";
 import {
   AuthMiddleware,
   VerifyTokenAll,
@@ -33,8 +33,10 @@ export class AuthResolver {
   @Mutation((_return) => UserMutationResponse)
   async register(
     @Arg("registerInput")
-    registerInput: RegisterInput
+    registerInput: RegisterInput,
+    @Ctx() { req }: Context
   ): Promise<UserMutationResponse> {
+
     const { email, userName, password, avatar } = registerInput;
 
     const existingUser = await User.findOne({ email });
@@ -42,7 +44,7 @@ export class AuthResolver {
       return {
         code: 400,
         success: false,
-        message: "Email already exists!!!",
+        message: req.t("Email already exists!"),
       };
     }
 
@@ -63,7 +65,7 @@ export class AuthResolver {
     return {
       code: 200,
       success: true,
-      message: "User registered successfully!!!",
+      message: req.t("User registered successfully!"),
       user: newUser,
     };
   }
@@ -73,7 +75,7 @@ export class AuthResolver {
   async login(
     @Arg("loginInput")
     { email, password }: LoginInput,
-    @Ctx() { res }: Context
+    @Ctx() { req, res }: Context
   ): Promise<UserMutationResponse> {
     console.log("login is working...", email);
     const checkAccount = await User.findOne({
@@ -84,7 +86,7 @@ export class AuthResolver {
       return {
         code: 400,
         success: false,
-        message: "Email not found!!!",
+        message: req.t("Email not found!"),
       };
     }
 
@@ -95,7 +97,7 @@ export class AuthResolver {
       return {
         code: 400,
         success: false,
-        message: "Password error!!!",
+        message: req.t("Password error!"),
       };
     }
 
@@ -107,14 +109,12 @@ export class AuthResolver {
       role: checkAccount.role,
     };
 
-
-
     const refreshToken = AuthMiddleware.sendRefreshToken(res, userModel);
 
     return {
       code: 200,
       success: true,
-      message: "Logged in successfully!!!",
+      message: req.t("Logged in successfully!"),
       accessToken: AuthMiddleware.createToken(ConfigJWT.create_token_type, userModel),
       refreshToken: refreshToken ?? "",
       user: {
@@ -130,14 +130,15 @@ export class AuthResolver {
 
   @Mutation((_return) => ForgotPasswordResponse)
   async forgotPassword(
-    @Arg("email") email: string
+    @Arg("email") email: string,
+    @Ctx() { req }: Context
   ): Promise<ForgotPasswordResponse> {
     const user = await User.findOne({ email });
     if (!user) {
       return {
         code: 400,
         success: false,
-        message: "Email not found.",
+        message: req.t("Email not found!"),
       };
     }
 
@@ -145,8 +146,8 @@ export class AuthResolver {
 
     const mailOptions = {
       to: email,
-      subject: "Password Reset OTP",
-      text: `Your OTP for password reset is: ${otp}`,
+      subject: req.t("Password Reset OTP"),
+      text: req.t("Your OTP for password reset is: {{otp}}", {otp: otp}),
     };
 
     sendEmail(mailOptions);
@@ -161,14 +162,15 @@ export class AuthResolver {
     return {
       code: 200,
       success: true,
-      message: "OTP sent to your email. Please check your inbox.",
+      message: req.t("OTP sent to your email. Please check your inbox."),
     };
   }
 
   @Mutation((_return) => ForgotPasswordResponse)
   async submitOTP(
     @Arg("email") email: string,
-    @Arg("otp") otp: string
+    @Arg("otp") otp: string,
+    @Ctx() { req }: Context
   ): Promise<ForgotPasswordResponse> {
     const user = await User.findOne({ email });
 
@@ -176,7 +178,7 @@ export class AuthResolver {
       return {
         code: 400,
         success: false,
-        message: "Email not found.",
+        message: req.t("Email not found!"),
       };
     }
 
@@ -184,7 +186,7 @@ export class AuthResolver {
       return {
         code: 400,
         success: false,
-        message: "OTP not match",
+        message: req.t("OTP not match"),
       };
     }
     const dateNow = Date.now();
@@ -192,7 +194,7 @@ export class AuthResolver {
       return {
         code: 400,
         success: false,
-        message: "OTP expired",
+        message: req.t("OTP expired"),
       };
     }
 
@@ -215,7 +217,7 @@ export class AuthResolver {
       code: 200,
       success: true,
       accessToken: token,
-      message: "OTP submitted successfully.",
+      message: req.t("OTP submitted successfully."),
     };
   }
 
@@ -223,12 +225,12 @@ export class AuthResolver {
   @Mutation((_return) => ForgotPasswordResponse)
   async resetPassword(
     @Arg("newPassword") newPassword: string,
-    @Ctx() { user: payloadVerify }: Context
+    @Ctx() { req, user: payloadVerify }: Context
   ): Promise<ForgotPasswordResponse> {
     const user = await User.findOne({ email: payloadVerify.email });
 
     if (!user) {
-      throw new ApolloError("Email not found.", "EMAIL_NOT_FOUND");
+      throw new ApolloError(req.t("User not found!"));
     }
 
     try {
@@ -243,7 +245,7 @@ export class AuthResolver {
       return {
         code: 200,
         success: true,
-        message: "Password reset successfully.",
+        message: req.t("Password reset successfully."),
       };
     } catch (error) {
       console.error("Error resetting password:", error);
@@ -257,7 +259,7 @@ export class AuthResolver {
   @Mutation((_return) => UserMutationResponse)
   async logout(
     @Arg("id", (_type) => ID) id: any,
-    @Ctx() { res }: Context
+    @Ctx() { req, res }: Context
   ): Promise<UserMutationResponse> {
     const existingUser = await User.findOne({
       _id: id,
@@ -266,7 +268,7 @@ export class AuthResolver {
       return {
         code: 401,
         success: true,
-        message: "Error !!!",
+        message: req.t("User not found!"),
       };
     }
     existingUser.token = "";
@@ -281,7 +283,7 @@ export class AuthResolver {
     return {
       code: 200,
       success: true,
-      message: "Logged out successfully!!!",
+      message: req.t("Logged out successfully!"),
     };
   }
 
@@ -299,7 +301,7 @@ export class AuthResolver {
         return {
           code: 404,
           success: false,
-          message: "User not found",
+          message: context.req.t("User not found!"),
         };
       }
 
@@ -316,7 +318,7 @@ export class AuthResolver {
       return {
         code: 200,
         success: true,
-        message: "User updated successfully",
+        message: context.req.t("User updated successfully"),
         user: existingUser,
       };
     } catch (error) {

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import ModelName from "../../constants/model_name";
 import { Field, ID, ObjectType } from "type-graphql";
 const Schema = mongoose.Schema;
 const model = mongoose.model;
@@ -24,5 +25,5 @@ export const reactionSchema = new Schema({
   imageURL: String,
 });
 
-const ReactionModel = model<IReaction>("reaction", reactionSchema);
+const ReactionModel = model<IReaction>(ModelName.REACTION, reactionSchema);
 export default ReactionModel;

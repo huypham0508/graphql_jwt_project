@@ -1,0 +1,27 @@
+{
+  "Email not found!": "Email không tồn tại!",
+  "User not found!": "Người dùng không tồn tại!",
+  "User updated successfully": "Cập nhật người dùng thành công",
+  "Password error!": "Lỗi mật khẩu!",
+  "Logged in successfully!": "Đăng nhập thành công!",
+  "Email already exists!": "Email đã tồn tại!",
+  "User registered successfully!": "Đăng ký người dùng thành công!",
+  "Your OTP for password reset is: {{otp}}": "Mã OTP của bạn để đặt lại mật khẩu là: {{otp}}",
+  "OTP sent to your email. Please check your inbox.": "Mã OTP đã được gửi vào email của bạn. Vui lòng kiểm tra hộp thư đến.",
+  "OTP not match": "Mã OTP không khớp",
+  "OTP expired": "Mã OTP đã hết hạn",
+  "OTP submitted successfully.": "Mã OTP đã được gửi thành công.",
+  "Password reset successfully.": "Đặt lại mật khẩu thành công.",
+  "Logged out successfully!": "Đăng xuất thành công!",
+
+  "Recipient not found!": "Không tìm thấy người nhận!",
+  "Recipients is required!": "Cần có người nhận!",
+  "Message sent successfully!": "Tin nhắn đã được gửi thành công!",
+  "Failed to send message": "Gửi tin nhắn thất bại",
+  "Room does not exist!": "Phòng không tồn tại!",
+  "Failed to fetch messages": "Lấy tin nhắn thất bại",
+  "{{userName}} has been created successfully": "{{userName}} đã được tạo thành công",
+  "Room created successfully {{name}}": "Phòng {{name}} đã được tạo thành công",
+  "roomId is required": "Bắt buộc phải có roomId",
+  "Room not found": "Không tìm thấy phòng"
+}

@@ -10,7 +10,7 @@ import connect_database from "./app/services/connect_database.service";
 import redis from "./app/services/redis_store.service";
 
 import { app, httpServer } from "./app/app";
-import { ConfigServer } from "./app/config/config";
+import { ConfigServer } from "./app/constants/config";
 import initializeModels from "./app/models/init_data";
 
 const main = async () => {

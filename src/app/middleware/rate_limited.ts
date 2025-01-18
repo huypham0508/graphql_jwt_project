@@ -1,6 +1,7 @@
 import rateLimit from "express-rate-limit";
 import { MiddlewareFn } from "type-graphql";
 import { Request, Response } from "express";
+import { ConfigServer } from "../constants/config";
 
 declare module "express-serve-static-core" {
   interface Request {
@@ -13,8 +14,8 @@ declare module "express-serve-static-core" {
   }
 }
 const apiLimiter = rateLimit({
-  windowMs: 2 * 60 * 1000,
-  max: 50,
+  windowMs: ConfigServer.WINDOW_MS,
+  max: ConfigServer.MAX_REQUESTS,
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req: Request, res: Response) => {

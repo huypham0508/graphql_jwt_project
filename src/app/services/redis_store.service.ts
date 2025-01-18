@@ -1,5 +1,5 @@
 import { createClient, RedisClientType } from 'redis';
-import { Redis } from '../config/config';
+import { Redis } from '../constants/config';
 
 class RedisStorage {
     private static instance: RedisStorage;
