@@ -1,40 +1,32 @@
-import {
-  ApolloServerPluginDrainHttpServer,
-} from "apollo-server-core";
-import { ApolloServer } from "apollo-server-express";
 import "reflect-metadata";
-
-import buildSchema from "./app/resolvers/index";
-
-import connect_database from "./app/services/connect_database.service";
-import redis from "./app/services/redis_store.service";
+import connect_database from "./app/core/services/connect_database.service";
+import redis from "./app/core/services/redis_store.service";
 
 import { app, httpServer } from "./app/app";
-import { ConfigServer } from "./app/constants/config";
-import initializeModels from "./app/models/init_data";
+import { ConfigServer } from "./app/config";
+import initializeModels from "./app/core/models/init_data";
+import ApolloServers from "./app/graphql_app";
 
 const main = async () => {
-  const apolloServer = new ApolloServer({
-    schema: await buildSchema,
-    plugins: [
-      ApolloServerPluginDrainHttpServer({ httpServer }),
-      // ApolloServerPluginLandingPageGraphQLPlayground
-    ],
-    context: ({ req, res }) => {
-      return { req, res };
-    },
-  });
-
   await connect_database();
   await initializeModels();
   await redis.RedisStorage.getInstance().connect();
 
-  await apolloServer.start();
-  apolloServer.applyMiddleware({ app });
+  const apolloServers = await ApolloServers();
+
+  for (const [index, apolloServer] of apolloServers.entries()) {
+    await apolloServer.start();
+    const versionPath = `/graphql/v${index + 1}`;
+    apolloServer.applyMiddleware({ app, path: versionPath });
+  }
+
   httpServer.listen({ port: ConfigServer.PORT }, async () => {
-    console.log(
-      `Server ready at http://localhost:${ConfigServer.PORT}${apolloServer.graphqlPath}`
-    );
+    apolloServers.forEach(async (_, index) => {
+      const versionPath = `/graphql/v${index + 1}`;
+      console.log(
+        `Server ready at http://localhost:${ConfigServer.PORT}${versionPath}`
+      );
+    });
   });
 };
 
