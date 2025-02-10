@@ -9,7 +9,7 @@ import {
 } from "type-graphql";
 import { doEvents } from "../controllers/events.controller";
 import { VerifyTokenAll } from "../../core/middleware/auth";
-import ChatRoomModel, { IRoom } from "../../core/models/chat/room.model";
+import ChatConversationModel, { IConversation } from "../../core/models/chat/conversation.model";
 import { Context } from "../../core/types/Context";
 import { ResponseData } from "../../core/types/response/IMutationResponse";
 
@@ -18,18 +18,18 @@ export class EmitEventResolver {
   @Mutation((_return) => ResponseData)
   @UseMiddleware(VerifyTokenAll)
   async typing(
-    @Arg("roomId") roomId: string,
+    @Arg("conversationId") conversationId: string,
     @Ctx() context: Context
   ): Promise<ResponseData> {
     const { user, req } = context;
     try {
-      if (!roomId) {
-        throw new ApolloError(req.t("roomId is required"));
+      if (!conversationId) {
+        throw new ApolloError(req.t("conversationId is required"));
       }
-      const room: IRoom | null = await ChatRoomModel.findById(roomId).lean();
+      const conversation: IConversation | null = await ChatConversationModel.findById(conversationId).lean();
 
-      if (!room) {
-        throw new ApolloError(req.t("Room not found"));
+      if (!conversation) {
+        throw new ApolloError(req.t("Conversation not found"));
       }
 
       doEvents({
@@ -38,9 +38,9 @@ export class EmitEventResolver {
           op: "add",
           event: {
             userTyping: user.id,
-            roomId: roomId,
+            conversationId: conversationId,
           },
-          recipients: room.participants
+          recipients: conversation.participants
           .filter((p) => p.toString() !== user.id)
           .map((p) => p.toString()),
         },

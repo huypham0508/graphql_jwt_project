@@ -2,7 +2,7 @@ export interface Event {
   event: any;
   id?: number | any;
   recipients: any[] | "all";
-  type: "message" | "room" | "post" | "user" | "typing";
+  type: "message" | "conversation" | "post" | "user" | "typing";
   op: "add" | "remove" | "update";
 }
 

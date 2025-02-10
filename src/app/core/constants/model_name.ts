@@ -6,6 +6,6 @@ export default class ModelName {
 
     public static MESSAGE: string = "messages";
     public static REACTION: string = "reactions";
-    public static CHAT_ROOM: string = "chatRooms";
+    public static CONVERSATION: string = "conversations";
     public static SUBSCRIPTION: string = "subscriptions";
 }

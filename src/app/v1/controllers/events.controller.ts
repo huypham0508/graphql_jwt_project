@@ -37,7 +37,7 @@ export const handleEventRegister = async(req: CustomRequest, res: Response): Pro
 export const handleEvents = async(req: CustomRequest, res: Response): Promise<void | Response> => {
   try {
     const queue_id = req.query.queue_id;
-    console.log(`Client disconnected: ${queue_id}`);
+    console.log(`Client Connected: ${queue_id}`);
 
     if (typeof queue_id !== 'string') {
       return res.status(404).json({

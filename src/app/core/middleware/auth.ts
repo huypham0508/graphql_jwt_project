@@ -21,7 +21,7 @@ class AuthMiddleware {
       checkType
         ? (ConfigJWT.JWT_ACCESS_PRIVATE_KEY as Secret)
         : (ConfigJWT.JWT_REFRESH_PRIVATE_KEY as Secret),
-      { expiresIn: checkType ? "1d" : "7d" }
+      { expiresIn: checkType ? "365d" : "7d" }
     );
 
     return token ?? "";
@@ -112,8 +112,7 @@ class AuthMiddleware {
           const authHeader = req.headers.authorization?.toString();
           const token = authHeader?.split(" ")[1];
           if (!token) throw new Error("No token provided");
-
-          const user: any = this.decodeToken(token);
+          const user: UserAuthPayload | undefined = this.decodeToken(token);
 
           if (!user) throw new Error("User not found");
 
@@ -178,6 +177,8 @@ class AuthMiddleware {
       if (decoded.tokenPermissions !== requiredRole) {
         throw new AuthenticationError("Unauthorized role");
       }
+      console.log({requiredRole, decoded});
+
       return decoded;
     } catch (error) {
       throw new AuthenticationError("Invalid token");
@@ -193,6 +194,7 @@ class AuthMiddleware {
   }
 
   private static findUser = async (decodedToken: UserAuthPayload) => {
+    console.log({decodedToken});
     return User.findOne({
       _id: decodedToken.id,
       email: decodedToken.email,

@@ -6,5 +6,5 @@ export class MessageInput {
   content: string;
 
   @Field({ nullable: true })
-  roomId?: string;
+  conversationId?: string;
 }

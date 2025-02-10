@@ -67,7 +67,6 @@ class RedisRepository {
         const redis = this.getRedisInstance();
         const pattern = "events:*";
         const recipients = event.recipients;
-
         let cursor = 0;
         do {
             const result = await redis.scan(cursor, { MATCH: pattern, COUNT: 10 });
@@ -76,7 +75,7 @@ class RedisRepository {
             const tasks = result.keys.map(async key => {
                 if (recipients !== "all" && Array.isArray(recipients)) {
                     const session = await this.getSession(key);
-                    if (session && recipients.includes(session.user_id)) {
+                    if (session != null && recipients.includes(session.user_id)) {
                         await this.addEvent(key, event);
                     }
                 } else if(recipients === "all"){

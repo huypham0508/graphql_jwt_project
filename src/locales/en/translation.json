@@ -18,10 +18,10 @@
   "Recipients is required!" : "Recipients is required!",
   "Message sent successfully!" : "Message sent successfully!",
   "Failed to send message": "Failed to send message",
-  "Room does not exist!": "Room does not exist!",
+  "Conversation does not exist!": "Conversation does not exist!",
   "Failed to fetch messages": "Failed to fetch messages",
   "{{userName}} has been created successfully": "{{userName}} has been created successfully",
-  "Room created successfully {{name}}": "Room created successfully {{name}}",
-  "roomId is required": "roomId is required",
-  "Room not found": "Room not found"
+  "Conversation created successfully {{name}}": "Conversation created successfully {{name}}",
+  "conversationId is required": "conversationId is required",
+  "Conversation not found": "Conversation not found"
 }

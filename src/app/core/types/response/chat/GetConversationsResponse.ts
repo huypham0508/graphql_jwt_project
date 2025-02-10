@@ -5,7 +5,7 @@ import { Field, ID, ObjectType } from "type-graphql";
 import { IMutationResponse } from "../IMutationResponse";
 
 @ObjectType()
-class RoomData {
+class ConversationData {
   @Field((_type) => ID)
   id: string;
 
@@ -23,11 +23,11 @@ class RoomData {
 }
 
 @ObjectType({ implements: IMutationResponse })
-export class GetRoomsResponse implements IMutationResponse {
+export class GetConversationsResponse implements IMutationResponse {
   code: number;
   success: boolean;
   message?: string;
 
-  @Field((_type) => [RoomData], { nullable: true })
-  data?: RoomData[];
+  @Field((_type) => [ConversationData], { nullable: true })
+  data?: ConversationData[];
 }

@@ -9,13 +9,13 @@ import {
 import { doEvents } from "../controllers/events.controller";
 import { VerifyTokenAll } from "../../core/middleware/auth";
 import { MessageModel } from "../../core/models/chat/message.model";
-import ChatRoomModel, { getChatRoom } from "../../core/models/chat/room.model";
+import ConversationModel, { getConversationOrCreate } from "../../core/models/chat/conversation.model";
 import SubscriptionModel, { createSubscriptions } from "../../core/models/chat/subscription.model";
 import { Context } from "../../core/types/Context";
 import { MessageInput } from "../../core/types/input/chat/MessageInput";
 import { NewMessageInput } from "../../core/types/input/chat/NewMessageInput";
-import { GetRoomsResponse } from "../../core/types/response/chat/GetRoomResponse";
-import { MessageResponse } from "../../core/types/response/chat/MessageResponse";
+import { GetConversationsResponse } from "../../core/types/response/chat/GetConversationsResponse";
+import { MessageData, MessageResponse } from "../../core/types/response/chat/MessageResponse";
 import { SendNewMessageResponse } from "../../core/types/response/chat/SendNewMessageResponse";
 import { ResponseData } from "../../core/types/response/IMutationResponse";
 
@@ -37,22 +37,20 @@ export class ChatResolver {
           message: req.t("Recipient not found!"),
         };
       }
-
-      const participants = [recipientId, user.id]
-      let room = await getChatRoom(participants);
-
+      const participants = [...new Set([recipientId, user.id])]
+      let conversation = await getConversationOrCreate(participants);
       const maxMessage = new MessageModel({
         sender: user.id,
         content,
-        room: room._id.toString(),
+        conversation: conversation._id.toString(),
       });
 
       await maxMessage.save();
-      room.maxMessage = maxMessage;
-      await room.save();
 
+      conversation.maxMessage = maxMessage;
+      await conversation.save();
       await (
-        await room.populate({
+        await conversation.populate({
           path: "maxMessage",
           populate: {
             path: "sender",
@@ -76,19 +74,18 @@ export class ChatResolver {
           recipients: [recipientId],
         },
       });
-
       //create subscriptions
       createSubscriptions({
         messageId: maxMessage.id,
         recipientIds: participants,
-        roomId: room.id,
+        conversationId: conversation.id,
         senderId: user.id,
       });
 
       return {
         success: true,
         code: 200,
-        room: room,
+        conversation: conversation,
         message: req.t("Message sent successfully!"),
       };
     } catch (error) {
@@ -107,28 +104,28 @@ export class ChatResolver {
     @Ctx() { req, user }: Context
   ): Promise<ResponseData> {
     try {
-      const { content, roomId } = messageInput;
+      const { content, conversationId } = messageInput;
 
-      const findRoom = await ChatRoomModel.findById(roomId);
+      const findConversation = await ConversationModel.findById(conversationId);
 
-      if (findRoom === null) {
+      if (findConversation === null) {
         return {
           success: false,
           code: 404,
-          message: req.t("Room does not exist!"),
+          message: req.t("Conversation does not exist!"),
         };
       }
 
       const maxMessage = new MessageModel({
         sender: user.id,
         content,
-        room: roomId,
+        conversation: conversationId,
       });
-      findRoom.maxMessage = maxMessage;
+      findConversation.maxMessage = maxMessage;
 
-      await Promise.all([findRoom.save(), maxMessage.save()]);
+      await Promise.all([findConversation.save(), maxMessage.save()]);
 
-      const recipients = findRoom.participants.map((id) => id.toString())
+      const recipients = findConversation.participants.map((id) => id.toString())
       doEvents({
         eventData: {
           type: "message",
@@ -141,7 +138,7 @@ export class ChatResolver {
       createSubscriptions({
         messageId: maxMessage.id,
         recipientIds: recipients,
-        roomId: findRoom.id,
+        conversationId: findConversation.id,
         senderId: user.id,
       });
 
@@ -161,34 +158,46 @@ export class ChatResolver {
 
   @UseMiddleware(VerifyTokenAll)
   @Query(() => MessageResponse)
-  async getMessagesByRoomId(
-    @Arg("roomId") roomId: string,
+  async getMessagesByConversationId(
+    @Arg("conversationId") conversationId: string,
     @Ctx() {req, user}: Context
   ): Promise<MessageResponse> {
     try {
-      const messages = await MessageModel.find({
-        room: roomId,
-      }).sort({ timestamp: 1 })
-        .populate({path: "room", populate: {path: "participants"}})
-        .populate({path: "sender", populate: {path: "role"}});
+      const conversation = await ConversationModel.findById(conversationId);
+
+      if (!conversation) {
+        throw new Error(req.t("conversation not found"));
+      }
 
       const subscriptions = await SubscriptionModel.find({
-        room: roomId,
+        conversation: conversationId,
         user: user.id,
       }).populate("user").populate("message");
 
-      const messageData = messages.map((message) => {
-        const status = subscriptions.find((sub) => sub.message.id.toString() === message.id.toString());
-        return {
-          message: message,
-          status: status,
-        };
-      });
+      if (!subscriptions) {
+        throw new Error(req.t("user is not subscribed"));
+      }
+
+      const messages = await MessageModel.find({
+        conversation: conversationId,
+      }).sort({ timestamp: 1 })
+        .populate({path: "conversation", populate: {path: "participants"}})
+        .populate({path: "sender", populate: {path: "role"}});
+
+      const subscriptionMap = new Map(subscriptions.map(sub => [sub.message.id.toString(), sub]));
+
+      const messageData: MessageData[] = messages.reduce((acc, message) => {
+        const status = subscriptionMap.get(message.id.toString());
+        if (status) acc.push({ message, status });
+        return acc;
+    }, [] as MessageData[]);
+
       return {
         success: true,
         code: 200,
         message: req.t("Successfully!"),
         data: messageData,
+        conversation,
       };
     } catch (error) {
       throw new Error(req.t("Failed to fetch messages"));
@@ -196,25 +205,26 @@ export class ChatResolver {
   }
 
   @UseMiddleware(VerifyTokenAll)
-  @Query(() => GetRoomsResponse)
-  async getAllRooms(@Ctx() { req, user }: Context): Promise<GetRoomsResponse> {
+  @Query(() => GetConversationsResponse)
+  async getAllConversations(@Ctx() { req, user }: Context): Promise<GetConversationsResponse> {
     try {
-      const rooms = await ChatRoomModel.find({
+      const conversations = await ConversationModel.find({
         participants: user.id,
       })
       .populate({path: "participants", populate: {path: "role"}})
       .populate({path: "maxMessage", populate: {path: "sender"}});
+      console.log({conversations});
 
       const subscriptions = await SubscriptionModel.find({
         user: user.id,
       }).populate("user").populate("message");
 
-      const filteredRooms = rooms.map((room) => {
+      const filteredConversations = conversations.map((conversation) => {
         let name: string = "";
-        const filteredParticipants = room.participants.filter(
+        conversation.participants.forEach(
           (participant: any, index: number) => {
-            if (room.name === null || room.name === "") {
-              if (room.participants.length > 2) {
+            if (conversation.name === null || conversation.name === "") {
+              if (conversation.participants.length > 2) {
                 if (index > 0) {
                   name += ", ";
                 }
@@ -224,33 +234,48 @@ export class ChatResolver {
             return participant.id.toString() !== user.id;
           }
         );
-        if (room.participants.length == 2) {
+
+        const seen = new Set();
+        const filteredParticipants = conversation.participants.filter((item: any) => {
+          console.log({item});
+          if (seen.has(item.id.toString())) return false;
+          seen.add(item.id.toString());
+          return true;
+        });
+
+        if (conversation.participants.length == 2 && (conversation.name === null || conversation.name === "")) {
           name = filteredParticipants[0].userName ?? "";
+        }else {
+          name = conversation.name;
         }
+
+        console.log({subscriptions});
+
         return {
-          id: room._id.toString(),
+          id: conversation._id.toString(),
           name: name,
           participants: filteredParticipants,
-          maxMessage: room.maxMessage,
-          status: subscriptions.find((s) => s.message.id.toString() === room.maxMessage.id.toString())
+          maxMessage: conversation.maxMessage,
+          status: subscriptions.find((s) => s.message?.id.toString() === conversation.maxMessage?.id.toString())
         };
       });
 
       return {
         code: 200,
         success: true,
-        data: filteredRooms,
+        data: filteredConversations,
       };
     } catch (error) {
-      throw new Error(req.t("Failed to fetch rooms"));
+      console.log(error);
+      throw new Error(req.t("Failed to fetch conversations"));
     }
   }
 
   @UseMiddleware(VerifyTokenAll)
   @Mutation(() => ResponseData)
-  async createRoom(
+  async createConversation(
     @Arg("participantIds", () => [String]) participantIds: string[],
-    @Arg("roomName") roomName: string,
+    @Arg("conversationName") conversationName: string,
     @Ctx() { req, user }: Context
   ): Promise<ResponseData> {
     try {
@@ -262,8 +287,8 @@ export class ChatResolver {
         };
       }
 
-      const newRoom = new ChatRoomModel({
-        name: roomName,
+      const newConversation = new ConversationModel({
+        name: conversationName,
         maxMessage: "",
         participants: [...participantIds, user.id],
       });
@@ -271,19 +296,19 @@ export class ChatResolver {
       const maxMessage = new MessageModel({
         sender: user.id,
         content: req.t("{{userName}} has been created successfully", {"userName": user.userName}),
-        room: newRoom._id.toString(),
+        conversation: newConversation._id.toString(),
       });
-      newRoom.maxMessage = maxMessage;
-      newRoom.populate("maxMessage");
+      newConversation.maxMessage = maxMessage;
+      newConversation.populate("maxMessage");
 
-      await Promise.all([maxMessage.save(), newRoom.save()]);
+      await Promise.all([maxMessage.save(), newConversation.save()]);
 
       const recipients = [...participantIds, user.id]
       doEvents({
         eventData: {
-          type: "room",
+          type: "conversation",
           op: "add",
-          event: newRoom,
+          event: newConversation,
           recipients: recipients.filter((participant) => participant !== user.id),
         },
       });
@@ -291,17 +316,17 @@ export class ChatResolver {
       createSubscriptions({
         messageId: maxMessage.id,
         recipientIds: recipients,
-        roomId: newRoom.id,
+        conversationId: newConversation.id,
         senderId: user.id,
       });
 
       return {
         success: true,
         code: 200,
-        message: req.t("Room created successfully {{name}}", { name: roomName}),
+        message: req.t("Conversation created successfully {{name}}", { name: conversationName}),
       };
     } catch (error) {
-      throw new Error("Failed to create room");
+      throw new Error("Failed to create conversation");
     }
   }
 }

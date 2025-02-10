@@ -1,14 +1,13 @@
 import { buildSchema } from "type-graphql";
 
-import { EmitEventResolver } from "./emit_events.resolver";
+import { AuthorizationMiddleware } from "../../core/middleware/auth";
 import { AuthResolver } from "./auth.resolver";
+import { ChatResolver } from "./chat.resolver";
+import { EmitEventResolver } from "./emit_events.resolver";
+import { PostResolver } from "./post.resolver";
 import { ReactionResolver } from "./reaction.resolver";
 import { RelationshipResolver } from "./relationship.resolver";
-import { ChatResolver } from "./chat.resolver";
-import { PostResolver } from "./post.resolver";
 import { SystemResolver } from "./system.resolver";
-import { AuthorizationMiddleware } from "../../core/middleware/auth";
-import { RateLimitMiddleware } from "../../core/middleware/rate_limited";
 
 export const publicFunctions = ["AuthResolver"];
 
@@ -23,5 +22,5 @@ export default buildSchema({
     RelationshipResolver,
     ChatResolver,
   ],
-  globalMiddlewares: [AuthorizationMiddleware, RateLimitMiddleware],
+  globalMiddlewares: [AuthorizationMiddleware],
 });

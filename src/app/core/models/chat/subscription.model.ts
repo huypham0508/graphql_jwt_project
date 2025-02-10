@@ -3,7 +3,7 @@ import { Field, ID, ObjectType } from "type-graphql";
 import ModelName from "../../../core/constants/model_name";
 import { IUser } from "../user/user.model";
 import { IMessage } from "./message.model";
-import { IRoom } from "./room.model";
+import { IConversation } from "./conversation.model";
 import { StatusMessage } from "../../../core/enum/status_message.enum";
 
 @ObjectType()
@@ -25,7 +25,7 @@ export class ISubscription {
     | StatusMessage.ERROR;
 
   // @Field()
-  room: IRoom;
+  conversation: IConversation;
 
   @Field()
   updatedAt: Date;
@@ -49,9 +49,9 @@ const subscriptionSchema = new Schema<ISubscription>(
       ref: ModelName.MESSAGE,
       required: true,
     },
-    room: {
+    conversation: {
       type: Schema.Types.ObjectId,
-      ref: ModelName.CHAT_ROOM,
+      ref: ModelName.CONVERSATION,
       required: true,
     },
   },
@@ -68,24 +68,24 @@ const SubscriptionModel = model(ModelName.SUBSCRIPTION, subscriptionSchema);
  * This function is used to record the delivery status of a message for each involved user.
  *
  * @param {string} messageId - The message ID.
- * @param {string} roomId - The chat room ID.
+ * @param {string} conversationId - The conversation ID.
  * @param {string} senderId - The sender's ID.
  * @param {string[]} recipientIds - An array of recipient IDs.
  */
 export const createSubscriptions = async (params: {
   messageId: string,
-  roomId: string,
+  conversationId: string,
   senderId: string,
   recipientIds: string[]}
 ) => {
-  const {messageId, roomId, senderId, recipientIds} = params;
+  const {messageId, conversationId, senderId, recipientIds} = params;
   try {
     const users = [...recipientIds, senderId];
 
     const subscriptions = users.map((userId) => ({
       user: userId,
       message: messageId,
-      room: roomId,
+      conversation: conversationId,
       status: userId === senderId ? StatusMessage.SENT : StatusMessage.DELIVERED,
     }));
 
