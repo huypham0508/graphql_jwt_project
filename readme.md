@@ -28,7 +28,7 @@ npm i
 3. sau đó chạy npm start
 
 ```shell
-npm start
+npm run dev
 ```
 
 ### Mô tả các lệnh trong dự án
@@ -36,7 +36,7 @@ npm start
 Trong dự án này, chúng ta có một số lệnh scripts được định nghĩa trong tệp `package.json` để giúp quản lý và phát triển ứng dụng Node.js.
 
 - `npm run server` : Lệnh này khởi động máy chủ bằng file server.js trong thư mục dist/src(Thư mục đã được build) bằng nodemon.
-- `npm run production` : Lệnh này khởi động máy chủ trong môi trường sản phẩm (production) bằng file server.js trong thư mục dist/src bằng node.
+- `npm run start` : Lệnh này khởi động máy chủ trong môi trường sản phẩm (production) bằng file server.js trong thư mục dist/src bằng node.
 - `npm run build` : Lệnh này dùng để xây dựng ứng dụng bằng TypeScript Compiler (tsc). Nó xóa thư mục dist trước khi biên dịch lại toàn bộ mã nguồn từ TypeScript sang JavaScript.
 
 ### Mô tả các công nghệ sử dụng trong dự án
