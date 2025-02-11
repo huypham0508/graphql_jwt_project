@@ -3,9 +3,12 @@ import dotenv from "dotenv";
 import { RedisClientOptions } from "redis";
 dotenv.config();
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export class ConfigMongo {
-  public static URI_DATABASE: any =
-    "mongodb+srv://admin2:oORArVKaZaSxgjfb@cluster0.37vmswz.mongodb.net/?retryWrites=true&w=majority";
+  private static URI_PRO: string = "mongodb+srv://admin2:oORArVKaZaSxgjfb@cluster0.37vmswz.mongodb.net/?retryWrites=true&w=majority";
+  private static URI_DEV: string = "mongodb://localhost:27017/database_graph_ql";
+  public static URI_DATABASE: any = isProduction ? this.URI_PRO : this.URI_DEV;
 }
 export class ConfigServer {
   public static app = express();

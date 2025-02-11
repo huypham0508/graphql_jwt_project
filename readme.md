@@ -19,10 +19,10 @@ git clone https://github.com/huypham0508/graphql_jwt_project.git
 cd graphql_jwt_project
 ```
 
-2. chạy lệnh npm i để kéo các package cần thiết để start
+2. chạy lệnh bash scripts/setup/started.sh để kéo các package cần thiết để start
 
 ```shell
-npm i
+bash scripts/setup/started.sh
 ```
 
 3. sau đó chạy npm start

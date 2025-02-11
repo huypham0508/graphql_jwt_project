@@ -5,6 +5,7 @@ import { ConfigMongo } from "../../config";
 dotenv.config();
 const connectDBService: any = async () => {
   try {
+
     await mongoose.connect(ConfigMongo.URI_DATABASE, {
       // useCreatendex: true,
       // useFindAndModify: false,
