@@ -6,17 +6,17 @@ dotenv.config();
 const isProduction = process.env.NODE_ENV === "production";
 
 export class ConfigMongo {
-  private static URI_PRO: string = "mongodb+srv://admin2:oORArVKaZaSxgjfb@cluster0.37vmswz.mongodb.net/?retryWrites=true&w=majority";
-  private static URI_DEV: string = "mongodb://localhost:27017/database_graph_ql";
+  private static URI_PRO: string = "mongodb+srv://admin2:oORArVKaZaSxgjfb@cluster0.37vmswz.mongodb.net/test/?retryWrites=true&w=majority";
+  private static URI_DEV: string = "mongodb://localhost:27017/database_graph_ql/database_graph_ql";
   public static URI_DATABASE: any = isProduction ? this.URI_PRO : this.URI_DEV;
 }
+
 export class ConfigServer {
   public static app = express();
   public static PORT: any = process.env.PORT || 4000;
   // rate limited settings
   public static WINDOW_MS: number = 15 * 60 * 1000;
   public static MAX_REQUESTS: number = 75;
-
 }
 export class ConfigJWT {
   public static create_token_type: string = "createToken";
