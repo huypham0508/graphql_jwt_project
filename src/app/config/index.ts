@@ -7,7 +7,7 @@ const isProduction = process.env.NODE_ENV === "production";
 
 export class ConfigMongo {
   private static URI_PRO: string = "mongodb+srv://admin2:oORArVKaZaSxgjfb@cluster0.37vmswz.mongodb.net/test/?retryWrites=true&w=majority";
-  private static URI_DEV: string = "mongodb://localhost:27017/database_graph_ql/database_graph_ql";
+  private static URI_DEV: string = "mongodb://localhost:27017/database_graph_ql";
   public static URI_DATABASE: any = isProduction ? this.URI_PRO : this.URI_DEV;
 }
 
