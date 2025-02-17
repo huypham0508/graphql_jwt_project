@@ -7,7 +7,7 @@ function createNewVersion() {
   const versions = fs
     .readdirSync(baseDir)
     .filter((folder) => folder.startsWith("v") && fs.lstatSync(path.join(baseDir, folder)).isDirectory())
-    .sort();
+    .sort(); 
 
   if (versions.length === 0) {
     console.error("Không tìm thấy phiên bản nào!");
