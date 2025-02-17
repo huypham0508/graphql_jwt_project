@@ -103,45 +103,55 @@
         <nav>
         </nav>
         <section>
-            <iframe id="content" src=""></iframe>
+            <github-md></github-md>
         </section>
     </div>
+    <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/Markdown-Tag/markdown-tag-commonmark.js"></script>
     <script>
         let default_link = ""
         const init = async () => {
             let links_html = ""
             await fetch("./links.json")
-            .then(response => response.json())
-            .then(json => {
-                default_link = json.default
-                json.links.forEach((link) => {
-                    if (link != "" && link !== null) {
-                        links_html += `<a href="?path=${link.path}">${link.title}</a>`
-                    }
-                })
-                document.querySelector("nav").innerHTML = links_html;
-            });
+                .then(response => response.json())
+                .then(json => {
+                    default_link = json.default
+                    json.links.forEach((link) => {
+                        if (link != "" && link !== null) {
+                            links_html += `<a href="?path=${link.path}">${link.title}</a>`
+                        }
+                    })
+                    document.querySelector("nav").innerHTML = links_html;
+                });
             await change_path();
+            const links = document.querySelectorAll('a');
+            links.forEach((item) => {
+                item.addEventListener('click', (event) => {
+                    change_path();
+                });
+            });
         }
-        const change_path = () => {
+        const change_path = async () => {
             const params = new URLSearchParams(window.location.search);
             const filePath = params.get("path");
-            view_content.src = filePath != null ? filePath + ".md" : default_link + ".md";
+            const url = filePath != null ? filePath + ".md" : default_link + ".md";
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.text(); 
+                })
+                .then(markdown => {
+                    document.querySelector("github-md").innerHTML = marked.parse(markdown);
+                })
+                .catch(error => console.error('Error fetching the markdown file:', error));
+
             let link_active = document.querySelector(`a[href="?path=${filePath}"]`)
-            console.log(link_active);
             if (link_active == null) {
                 link_active = document.querySelector(`a[href="?path=${default_link}"]`)
             }
             link_active.classList.add("active")
         }
-
-        const links = document.querySelectorAll('a');
-        const view_content = document.querySelector('#content');
-        links.forEach((item) => {
-            item.addEventListener('click', (event) => {
-                change_path();
-            });
-        });
         init();
     </script>
 </body>

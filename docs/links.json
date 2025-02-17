@@ -16,6 +16,10 @@
         {
             "path": "help/hello2",
             "title": "Hello 2"
+        },
+        {
+            "path": "test1/hashid",
+            "title": "Hello 2"
         }
     ]
 }
