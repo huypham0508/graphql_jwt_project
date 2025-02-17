@@ -23,9 +23,13 @@ const main = async () => {
   httpServer.listen({ port: ConfigServer.PORT }, async () => {
     apolloServers.forEach(async (_, index) => {
       const versionPath = `/graphql/v${index + 1}`;
+      console.group();
       console.log(
-        `Server ready at http://localhost:${ConfigServer.PORT}${versionPath}`
+        `Graphql ready at http://localhost:${ConfigServer.PORT}${versionPath}`
       );
+      console.log(`Docs ready at http://localhost:${ConfigServer.PORT}/api/v1`);
+      console.log(`Docs ready at http://localhost:${ConfigServer.PORT}/docs`);
+      console.groupEnd();
     });
   });
 };

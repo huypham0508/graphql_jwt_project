@@ -23,6 +23,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(i18nextMiddleware.handle(i18n));
 
 app.use("/public", express.static(path.join(__dirname, "../../public")));
+app.use("/docs", express.static(path.join(__dirname, "../../docs")));
 app.post("/upload", uploadImage.fields([{ name: "file", maxCount: 1 }]), handleUpload);
 
 app.use("/api/v1", v1);

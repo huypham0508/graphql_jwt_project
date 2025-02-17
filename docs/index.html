@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <style>
+        *,
+        *:before,
+        *:after {
+            box-sizing: border-box;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            font: inherit;
+        }
+
+        img,
+        picture,
+        svg,
+        video {
+            display: block;
+            max-width: 100%;
+        }
+
+        input,
+        select,
+        textarea {
+            background-color: transparent;
+            outline: none;
+        }
+
+        button {
+            cursor: pointer;
+            background-color: transparent;
+            outline: none;
+            border: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .wrapper {
+            width: 100%;
+            height: 100dvh;
+            display: flex;
+            justify-content: start;
+            flex: 1;
+            gap: 0 5px;
+            overflow: hidden;
+        }
+
+        nav {
+            overflow-y: scroll;
+            overflow-x: hidden;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px 0;
+            border-right: 1px solid #7a7a7a;
+        }
+
+        nav a {
+            text-decoration: none;
+        }
+
+        nav a.active {
+            color: red;
+            font-weight: bold;
+        }
+
+        nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        section {
+            flex: 3;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        section::-webkit-scrollbar {
+            display: none;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <div class="wrapper">
+        <nav>
+        </nav>
+        <section>
+            <iframe id="content" src=""></iframe>
+        </section>
+    </div>
+    <script>
+        let default_link = ""
+        const init = async () => {
+            let links_html = ""
+            await fetch("./links.json")
+            .then(response => response.json())
+            .then(json => {
+                default_link = json.default
+                json.links.forEach((link) => {
+                    if (link != "" && link !== null) {
+                        links_html += `<a href="?path=${link.path}">${link.title}</a>`
+                    }
+                })
+                document.querySelector("nav").innerHTML = links_html;
+            });
+            await change_path();
+        }
+        const change_path = () => {
+            const params = new URLSearchParams(window.location.search);
+            const filePath = params.get("path");
+            view_content.src = filePath != null ? filePath + ".md" : default_link + ".md";
+            let link_active = document.querySelector(`a[href="?path=${filePath}"]`)
+            console.log(link_active);
+            if (link_active == null) {
+                link_active = document.querySelector(`a[href="?path=${default_link}"]`)
+            }
+            link_active.classList.add("active")
+        }
+
+        const links = document.querySelectorAll('a');
+        const view_content = document.querySelector('#content');
+        links.forEach((item) => {
+            item.addEventListener('click', (event) => {
+                change_path();
+            });
+        });
+        init();
+    </script>
+</body>
+
+</html>
