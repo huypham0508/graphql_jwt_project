@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
+RUN mkdir -p dist/public && npm run build
 
 EXPOSE 4000
 
