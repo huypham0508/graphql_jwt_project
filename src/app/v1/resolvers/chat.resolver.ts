@@ -6,78 +6,83 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
-import { doEvents } from "../controllers/events.controller";
 import { VerifyTokenAll } from "../../core/middleware/auth";
+import ConversationModel from "../../core/models/chat/conversation.model";
 import { MessageModel } from "../../core/models/chat/message.model";
-import ConversationModel, { getConversationOrCreate } from "../../core/models/chat/conversation.model";
-import SubscriptionModel, { createSubscriptions } from "../../core/models/chat/subscription.model";
+import SubscriptionModel from "../../core/models/chat/subscription.model";
 import { Context } from "../../core/types/Context";
-import { MessageInput } from "../../core/types/input/chat/MessageInput";
-import { NewMessageInput } from "../../core/types/input/chat/NewMessageInput";
+import { SendMessageInput } from "../../core/types/input/chat/MessageInput";
 import { GetConversationsResponse } from "../../core/types/response/chat/GetConversationsResponse";
-import { MessageData, MessageResponse } from "../../core/types/response/chat/MessageResponse";
+import {
+  MessageData,
+  MessageResponse,
+} from "../../core/types/response/chat/MessageResponse";
 import { SendNewMessageResponse } from "../../core/types/response/chat/SendNewMessageResponse";
 import { ResponseData } from "../../core/types/response/IMutationResponse";
+import {
+  getConversationOrCreate,
+  populateConversation,
+  updateLastMessage,
+} from "../actions/chat/conversation.actions";
+import { addMessage } from "../actions/chat/message.actions";
+import { createSubscriptions } from "../actions/chat/subscription.actions";
+import { doEvents } from "../controllers/events.controller";
 
 @Resolver()
 export class ChatResolver {
   @UseMiddleware(VerifyTokenAll)
   @Mutation(() => SendNewMessageResponse)
-  async sendNewMessage(
-    @Arg("newMessageInput") messageInput: NewMessageInput,
+  async sendMessage(
+    @Arg("sendMessageInput") messageInput: SendMessageInput,
     @Ctx() { req, user }: Context
   ): Promise<SendNewMessageResponse> {
     try {
-      const { content, recipientId } = messageInput;
+      const { content, recipientId, conversationId } = messageInput;
 
-      if (recipientId === null) {
-        return {
-          success: false,
-          code: 404,
-          message: req.t("Recipient not found!"),
-        };
+      let conversation;
+      let recipients: string[];
+
+      if (recipientId) {
+        recipients = [...new Set([recipientId, user.id])];
+        conversation = await getConversationOrCreate(recipients);
+      } else if (conversationId) {
+        conversation = await ConversationModel.findById(conversationId);
+        if (!conversation) {
+          return {
+            success: false,
+            code: 404,
+            message: req.t("Conversation does not exist!"),
+          };
+        }
+        recipients = conversation.participants.map((id) => id.toString());
+      } else {
+        return { success: false, code: 400, message: req.t("Invalid input!") };
       }
-      const participants = [...new Set([recipientId, user.id])]
-      let conversation = await getConversationOrCreate(participants);
-      const maxMessage = new MessageModel({
+
+      const maxMessage = await addMessage({
         sender: user.id,
         content,
-        conversation: conversation._id.toString(),
+        conversation: conversation.id.toString(),
       });
-
-      await maxMessage.save();
 
       conversation.maxMessage = maxMessage;
-      await conversation.save();
-      await (
-        await conversation.populate({
-          path: "maxMessage",
-          populate: {
-            path: "sender",
-            populate: {
-              path: "role",
-            }
-          },
-        })
-      ).populate({
-        path: "participants",
-        populate: {
-          path: "role",
-        }
-      });
+      await updateLastMessage(conversation.id, maxMessage.id);
+      await populateConversation(conversation);
 
       doEvents({
         eventData: {
           type: "message",
           op: "add",
           event: maxMessage,
-          recipients: [recipientId],
+          recipients: recipients.filter(
+            (participant) => participant !== user.id
+          ),
         },
       });
-      //create subscriptions
+
       createSubscriptions({
         messageId: maxMessage.id,
-        recipientIds: participants,
+        recipientIds: recipients,
         conversationId: conversation.id,
         senderId: user.id,
       });
@@ -91,66 +96,7 @@ export class ChatResolver {
     } catch (error) {
       return {
         success: false,
-        code: 404,
-        message: req.t("Failed to send message"),
-      };
-    }
-  }
-
-  @UseMiddleware(VerifyTokenAll)
-  @Mutation(() => ResponseData)
-  async sendMessage(
-    @Arg("messageInput") messageInput: MessageInput,
-    @Ctx() { req, user }: Context
-  ): Promise<ResponseData> {
-    try {
-      const { content, conversationId } = messageInput;
-
-      const findConversation = await ConversationModel.findById(conversationId);
-
-      if (findConversation === null) {
-        return {
-          success: false,
-          code: 404,
-          message: req.t("Conversation does not exist!"),
-        };
-      }
-
-      const maxMessage = new MessageModel({
-        sender: user.id,
-        content,
-        conversation: conversationId,
-      });
-      findConversation.maxMessage = maxMessage;
-
-      await Promise.all([findConversation.save(), maxMessage.save()]);
-
-      const recipients = findConversation.participants.map((id) => id.toString())
-      doEvents({
-        eventData: {
-          type: "message",
-          op: "add",
-          event: maxMessage,
-          recipients: recipients.filter((participant) => participant !== user.id),
-        },
-      });
-
-      createSubscriptions({
-        messageId: maxMessage.id,
-        recipientIds: recipients,
-        conversationId: findConversation.id,
-        senderId: user.id,
-      });
-
-      return {
-        success: true,
-        code: 200,
-        message: req.t("Message sent successfully!"),
-      };
-    } catch (error) {
-      return {
-        success: false,
-        code: 404,
+        code: 500,
         message: req.t("Failed to send message"),
       };
     }
@@ -160,7 +106,7 @@ export class ChatResolver {
   @Query(() => MessageResponse)
   async getMessagesByConversationId(
     @Arg("conversationId") conversationId: string,
-    @Ctx() {req, user}: Context
+    @Ctx() { req, user }: Context
   ): Promise<MessageResponse> {
     try {
       const conversation = await ConversationModel.findById(conversationId);
@@ -172,7 +118,9 @@ export class ChatResolver {
       const subscriptions = await SubscriptionModel.find({
         conversation: conversationId,
         user: user.id,
-      }).populate("user").populate("message");
+      })
+        .populate("user")
+        .populate("message");
 
       if (!subscriptions) {
         throw new Error(req.t("user is not subscribed"));
@@ -180,17 +128,20 @@ export class ChatResolver {
 
       const messages = await MessageModel.find({
         conversation: conversationId,
-      }).sort({ timestamp: 1 })
-        .populate({path: "conversation", populate: {path: "participants"}})
-        .populate({path: "sender", populate: {path: "role"}});
+      })
+        .sort({ timestamp: 1 })
+        .populate({ path: "conversation", populate: { path: "participants" } })
+        .populate({ path: "sender", populate: { path: "role" } });
 
-      const subscriptionMap = new Map(subscriptions.map(sub => [sub.message.id.toString(), sub]));
+      const subscriptionMap = new Map(
+        subscriptions.map((sub) => [sub.message.id.toString(), sub])
+      );
 
       const messageData: MessageData[] = messages.reduce((acc, message) => {
         const status = subscriptionMap.get(message.id.toString());
         if (status) acc.push({ message, status });
         return acc;
-    }, [] as MessageData[]);
+      }, [] as MessageData[]);
 
       return {
         success: true,
@@ -206,57 +157,68 @@ export class ChatResolver {
 
   @UseMiddleware(VerifyTokenAll)
   @Query(() => GetConversationsResponse)
-  async getAllConversations(@Ctx() { req, user }: Context): Promise<GetConversationsResponse> {
+  async getAllConversations(
+    @Ctx() { req, user }: Context
+  ): Promise<GetConversationsResponse> {
     try {
       const conversations = await ConversationModel.find({
         participants: user.id,
       })
-      .populate({path: "participants", populate: {path: "role"}})
-      .populate({path: "maxMessage", populate: {path: "sender"}});
-      console.log({conversations});
+        .populate({ path: "participants", populate: { path: "role" } })
+        .populate({ path: "maxMessage", populate: { path: "sender" } });
+      console.log({ conversations });
 
       const subscriptions = await SubscriptionModel.find({
         user: user.id,
-      }).populate("user").populate("message");
+      })
+        .populate("user")
+        .populate("message");
 
       const filteredConversations = conversations.map((conversation) => {
         let name: string = "";
-        conversation.participants.forEach(
-          (participant: any, index: number) => {
-            if (conversation.name === null || conversation.name === "") {
-              if (conversation.participants.length > 2) {
-                if (index > 0) {
-                  name += ", ";
-                }
-                name += participant.userName;
+        conversation.participants.forEach((participant: any, index: number) => {
+          if (conversation.name === null || conversation.name === "") {
+            if (conversation.participants.length > 2) {
+              if (index > 0) {
+                name += ", ";
               }
+              name += participant.userName;
             }
-            return participant.id.toString() !== user.id;
+          }
+          return participant.id.toString() !== user.id;
+        });
+
+        const seen = new Set();
+        const filteredParticipants = conversation.participants.filter(
+          (item: any) => {
+            console.log({ item });
+            if (seen.has(item.id.toString())) return false;
+            seen.add(item.id.toString());
+            return true;
           }
         );
 
-        const seen = new Set();
-        const filteredParticipants = conversation.participants.filter((item: any) => {
-          console.log({item});
-          if (seen.has(item.id.toString())) return false;
-          seen.add(item.id.toString());
-          return true;
-        });
-
-        if (conversation.participants.length == 2 && (conversation.name === null || conversation.name === "")) {
+        if (
+          conversation.participants.length == 2 &&
+          (conversation.name === null || conversation.name === "")
+        ) {
           name = filteredParticipants[0].userName ?? "";
-        }else {
+        } else {
           name = conversation.name;
         }
 
-        console.log({subscriptions});
+        console.log({ subscriptions });
 
         return {
           id: conversation._id.toString(),
           name: name,
           participants: filteredParticipants,
           maxMessage: conversation.maxMessage,
-          status: subscriptions.find((s) => s.message?.id.toString() === conversation.maxMessage?.id.toString())
+          status: subscriptions.find(
+            (s) =>
+              s.message?.id.toString() ===
+              conversation.maxMessage?.id.toString()
+          ),
         };
       });
 
@@ -295,7 +257,9 @@ export class ChatResolver {
 
       const maxMessage = new MessageModel({
         sender: user.id,
-        content: req.t("{{userName}} has been created successfully", {"userName": user.userName}),
+        content: req.t("{{userName}} has been created successfully", {
+          userName: user.userName,
+        }),
         conversation: newConversation._id.toString(),
       });
       newConversation.maxMessage = maxMessage;
@@ -303,13 +267,15 @@ export class ChatResolver {
 
       await Promise.all([maxMessage.save(), newConversation.save()]);
 
-      const recipients = [...participantIds, user.id]
+      const recipients = [...participantIds, user.id];
       doEvents({
         eventData: {
           type: "conversation",
           op: "add",
           event: newConversation,
-          recipients: recipients.filter((participant) => participant !== user.id),
+          recipients: recipients.filter(
+            (participant) => participant !== user.id
+          ),
         },
       });
 
@@ -323,7 +289,9 @@ export class ChatResolver {
       return {
         success: true,
         code: 200,
-        message: req.t("Conversation created successfully {{name}}", { name: conversationName}),
+        message: req.t("Conversation created successfully {{name}}", {
+          name: conversationName,
+        }),
       };
     } catch (error) {
       throw new Error("Failed to create conversation");
