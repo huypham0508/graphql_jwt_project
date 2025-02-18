@@ -117,12 +117,12 @@
                     default_link = json.default
                     json.links.forEach((link) => {
                         if (link != "" && link !== null) {
-                            links_html += `<ul><a href="?path=${link.path}">${link.title}</a>`
+                            links_html += `<a href="?path=${link.path}">${link.title}</a>`
+
                         }
                     })
                     document.querySelector("nav").innerHTML = links_html;
                 });
-                
             await change_path();
             const links = document.querySelectorAll('a');
             links.forEach((item) => {
