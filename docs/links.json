@@ -7,7 +7,27 @@
         },
         {
             "path": "help/hello",
-            "title": "Hell"
+            "title": "Hell",
+            "children":[
+                {
+                    "path": "help/hello",
+                    "title": "a",
+                    "children":[
+                        {
+                            "path": "help/hello1",
+                            "title": "a1"
+                        },
+                        {
+                            "path": "help/hello1",
+                            "title": "a2"
+                        }
+                    ]
+                },
+                {
+                    "path": "help/hello",
+                    "title": "b"
+                }
+            ]
         },
         {
             "path": "help/hello1",

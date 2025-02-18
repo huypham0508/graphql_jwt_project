@@ -35,7 +35,24 @@
             background-color: transparent;
             outline: none;
         }
+         /* Style cho sidebar */
+         ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
 
+        li {
+            margin: 5px 0;
+        }
+
+        .children {
+            display: none;
+        }
+
+        .toggle-btn {
+            cursor: pointer;
+            color: blue;
+        }
         button {
             cursor: pointer;
             background-color: transparent;
@@ -108,6 +125,33 @@
     </div>
     <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/Markdown-Tag/markdown-tag-commonmark.js"></script>
     <script>
+          function generateSidebar(links) {
+            let html = '<ul>';
+
+            links.forEach(link => {
+                html += `<li><a href="${link.path}">${link.title}</a>`;
+
+                if (link.children && link.children.length > 0) {
+                    html += `<span class="toggle-btn" onclick="toggleChildren(this)">[+]</span>`;
+                    html += `<ul class="children">${generateSidebar(link.children)}</ul>`;
+                }
+
+                html += '</li>';
+            });
+
+            html += '</ul>';
+            return html;
+        }
+        function toggleChildren(button) {
+    const childrenList = button.nextElementSibling;
+    if (childrenList.style.display === 'none' || childrenList.style.display === '') {
+        childrenList.style.display = 'block';
+        button.textContent = '[-]'; // Thay đổi nút thành dấu trừ
+    } else {
+        childrenList.style.display = 'none';
+        button.textContent = '[+]'; // Thay đổi nút thành dấu cộng
+    }
+}
         let default_link = ""
         const init = async () => {
             let links_html = ""
@@ -115,12 +159,13 @@
                 .then(response => response.json())
                 .then(json => {
                     default_link = json.default
-                    json.links.forEach((link) => {
-                        if (link != "" && link !== null) {
-                            links_html += `<a href="?path=${link.path}">${link.title}</a>`
-                        }
-                    })
-                    document.querySelector("nav").innerHTML = links_html;
+                    // json.links.forEach((link) => {
+                    //     if (link != "" && link !== null) {
+                    //         links_html += `<a href="?path=${link.path}">${link.title}</a>`
+                    //     }
+                    // })
+                    const sidebarHTML = generateSidebar(json.links);
+                    document.querySelector("nav").innerHTML = sidebarHTML;
                 });
             await change_path();
             const links = document.querySelectorAll('a');
