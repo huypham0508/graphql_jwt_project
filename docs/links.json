@@ -6,8 +6,22 @@
             "title": "Introduction"
         },
         {
-            "path": "help/hello",
-            "title": "Hell"
+            "path": "help/controllers/controllers",
+            "title": "Controllers",
+            "children":[
+                {
+                    "path":"help/controllers/event-controllers",
+                    "title":"Event Controllers",
+                    "children":[{
+                        "path":"help/controller/event-controllers/abc",
+                        "title":"test"
+                    }]
+                },
+                {
+                    "path":"help/controllers/refresh-token",
+                    "title":"Refresh token"
+                }
+                ]       
         },
         {
             "path": "help/hello1",

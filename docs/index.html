@@ -1,159 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <style>
-        *,
-        *:before,
-        *:after {
-            box-sizing: border-box;
-        }
+      *,
+      *:before,
+      *:after {
+        box-sizing: border-box;
+      }
 
-        * {
-            margin: 0;
-            padding: 0;
-            font: inherit;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        font: inherit;
+      }
 
-        img,
-        picture,
-        svg,
-        video {
-            display: block;
-            max-width: 100%;
-        }
+      img,
+      picture,
+      svg,
+      video {
+        display: block;
+        max-width: 100%;
+      }
 
-        input,
-        select,
-        textarea {
-            background-color: transparent;
-            outline: none;
-        }
+      input,
+      select,
+      textarea {
+        background-color: transparent;
+        outline: none;
+      }
 
-        button {
-            cursor: pointer;
-            background-color: transparent;
-            outline: none;
-            border: 0;
-        }
+      button {
+        cursor: pointer;
+        background-color: transparent;
+        outline: none;
+        border: 0;
+      }
 
-        body {
-            min-height: 100vh;
-            font-weight: 400;
-            font-size: 16px;
-            line-height: 1;
-        }
+      body {
+        min-height: 100vh;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 1;
+      }
 
-        .wrapper {
-            width: 100%;
-            height: 100dvh;
-            display: flex;
-            justify-content: start;
-            flex: 1;
-            gap: 0 5px;
-            overflow: hidden;
-        }
+      .wrapper {
+        width: 100%;
+        height: 100dvh;
+        display: flex;
+        justify-content: start;
+        flex: 1;
+        gap: 0 5px;
+        overflow: hidden;
+      }
 
-        nav {
-            overflow-y: scroll;
-            overflow-x: hidden;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px 0;
-            border-right: 1px solid #7a7a7a;
-        }
+      nav {
+        overflow-y: scroll;
+        overflow-x: hidden;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px 0;
+        border-right: 1px solid #7a7a7a;
+      }
 
-        nav a {
-            text-decoration: none;
-        }
+      nav a {
+        text-decoration: none;
+      }
 
-        nav a.active {
-            color: red;
-            font-weight: bold;
-        }
+      nav a.active {
+        color: red;
+        font-weight: bold;
+      }
 
-        nav::-webkit-scrollbar {
-            display: none;
-        }
+      nav ul {
+        display: none; 
+      }
 
-        section {
-            flex: 3;
-            overflow-y: scroll;
-            overflow-x: hidden;
-            padding: 20px;
-        }
+      nav .active > ul {
+        display: block; 
+      }
+      nav::-webkit-scrollbar {
+        display: none;
+      }
 
-        section::-webkit-scrollbar {
-            display: none;
-        }
+      section {
+        flex: 3;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        padding: 20px;
+      }
 
-        iframe {
-            width: 100%;
-            height: 100%;
-        }
+      section::-webkit-scrollbar {
+        display: none;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+      }
     </style>
     <div class="wrapper">
-        <nav>
-        </nav>
-        <section>
-            <github-md></github-md>
-        </section>
+      <nav></nav>
+      <section>
+        <github-md></github-md>
+      </section>
     </div>
     <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/Markdown-Tag/markdown-tag-commonmark.js"></script>
     <script>
-        let default_link = ""
-        const init = async () => {
-            let links_html = ""
-            await fetch("./links.json")
-                .then(response => response.json())
-                .then(json => {
-                    default_link = json.default
-                    json.links.forEach((link) => {
-                        if (link != "" && link !== null) {
-                            links_html += `<a href="?path=${link.path}">${link.title}</a>`
-                        }
-                    })
-                    document.querySelector("nav").innerHTML = links_html;
-                });
-            await change_path();
-            const links = document.querySelectorAll('a');
-            links.forEach((item) => {
-                item.addEventListener('click', (event) => {
-                    change_path();
-                });
+      const toggleSubMenu = (event) => {
+        event.stopPropagation()
+        const navItem = event.target.closest(".nav-item");
+        if (navItem) {
+          navItem.classList.toggle("active");
+        }
+      };
+
+      const createNavLink = (link) => {
+        let html = `<a href="?path=${link.path}">${link.title}</a>`;
+
+        if (link.children) {
+          html += "<ul>";
+          link.children.forEach((child) => {
+            console.log(child)
+            html += `<li><a href="?path=${child.path}">${child.title}</a></li>`;
+          });
+          html += "</ul>";
+        }
+
+        return `<div class="nav-item">${html}</div>`;
+      };
+
+      const init = async () => {
+        let links_html = "";
+        await fetch("./links.json")
+          .then((response) => response.json())
+          .then((json) => {
+            default_link = json.default;
+            json.links.forEach((link) => {
+              if (link !== "" && link !== null) {
+                links_html += createNavLink(link);
+              }
             });
-        }
-        const change_path = async () => {
-            const params = new URLSearchParams(window.location.search);
-            const filePath = params.get("path");
-            const url = filePath != null ? filePath + ".md" : default_link + ".md";
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.text(); 
-                })
-                .then(markdown => {
-                    document.querySelector("github-md").innerHTML = marked.parse(markdown);
-                })
-                .catch(error => console.error('Error fetching the markdown file:', error));
+            document.querySelector("nav").innerHTML = links_html;
+          });
 
-            let link_active = document.querySelector(`a[href="?path=${filePath}"]`)
-            if (link_active == null) {
-                link_active = document.querySelector(`a[href="?path=${default_link}"]`)
+        await change_path();
+        document.querySelectorAll(".nav-item > a").forEach((link) => {
+          link.addEventListener("click", (event) => {
+            change_path();
+          });
+        });
+
+        // Mở menu con nếu URL hiện tại khớp với liên kết con
+        openActiveMenu();
+      };
+
+      const change_path = async () => {
+        const params = new URLSearchParams(window.location.search);
+        const filePath = params.get("path");
+        const url = filePath ? filePath + ".md" : default_link + ".md";
+
+        fetch(url)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
             }
-            link_active.classList.add("active")
-        }
-        init();
-    </script>
-</body>
+            return response.text();
+          })
+          .then((markdown) => {
+            document.querySelector("github-md").innerHTML =
+              marked.parse(markdown);
+          })
+          .catch((error) =>
+            console.error("Error fetching the markdown file:", error)
+          );
 
+        document.querySelectorAll("nav a").forEach((link) => {
+          link.classList.remove("active");
+        });
+
+        let activeLink = document.querySelector(`a[href="?path=${filePath}"]`);
+        if (!activeLink) {
+          activeLink = document.querySelector(
+            `a[href="?path=${default_link}"]`
+          );
+        }
+        if (activeLink) {
+          activeLink.classList.add("active");
+        }
+
+        openActiveMenu();
+      };
+
+      // Hàm này mở menu con khi nhấn vào một liên kết con
+      const openActiveMenu = () => {
+        const activeLink = document.querySelector("nav a.active");
+        if (activeLink) {
+          const parentNavItem = activeLink.closest(".nav-item");
+          if (parentNavItem) {
+            parentNavItem.classList.add("active");
+          }
+        }
+      };
+
+      init();
+    </script>
+  </body>
 </html>
