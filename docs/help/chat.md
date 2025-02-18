@@ -1,4 +1,4 @@
-# Tài liệu ChatResolver
+# ChatResolver
 
 Tài liệu chi tiết về lớp ChatResolver xử lý các hoạt động GraphQL liên quan đến chat bao gồm gửi tin nhắn, tạo cuộc trò chuyện và truy xuất dữ liệu chat.
 
