@@ -1,25 +1,19 @@
 {
-    "default": "introduction",
-    "links": [
+  "default": "introduction",
+  "links": [
+    {
+        "path": "introduction",
+        "title": "Introduction"
+    },
+    {
+      "title": "Resolvers",
+        "children": [
         {
-            "path": "introduction",
-            "title": "Introduction"
-        },
-        {
-            "path": "help/hello",
-            "title": "Hell"
-        },
-        {
-            "path": "help/hello1",
-            "title": "Hello 1"
-        },
-        {
-            "path": "help/hello2",
-            "title": "Hello 2"
-        },
-        {
-            "path": "test1/hashid",
-            "title": "Hello 2"
-        }
+            "title": "Chat",
+            "path": "help/chat"
+      }
     ]
+    }
+  ]
 }
+
