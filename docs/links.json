@@ -6,16 +6,8 @@
             "title": "Introduction"
         },
         {
-            "path": "help/hello",
-            "title": "Hell"
-        },
-        {
-            "path": "help/hello1",
-            "title": "Hello 1"
-        },
-        {
-            "path": "help/hello2",
-            "title": "Hello 2"
+            "path": "help/authresolver",
+            "title": "AuthResolver"
         },
         {
             "path": "test1/hashid",

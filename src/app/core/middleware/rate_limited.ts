@@ -13,6 +13,7 @@ declare module "express-serve-static-core" {
     };
   }
 }
+
 const apiLimiter = rateLimit({
   windowMs: ConfigServer.WINDOW_MS,
   max: ConfigServer.MAX_REQUESTS,
