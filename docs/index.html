@@ -90,7 +90,7 @@
         nav {
             overflow-y: scroll;
             overflow-x: hidden;
-            padding: 2rem;
+            padding: 1rem;
             display: flex;
             flex-direction: column;
             gap: 0.15rem;
@@ -166,10 +166,10 @@
         }
 
         section {
-            flex: 0.6;
+            flex: 1;
             overflow-y: scroll;
             overflow-x: hidden;
-            padding: 2.5rem 3rem;
+            padding: 2.5rem 1.5rem;
             background-color: #ffffff;
         }
 
@@ -190,7 +190,7 @@
         github-md {
             display: block;
             max-width: 900px;
-            margin: 0 auto;
+            margin-left: 2rem;
         }
 
         github-md h1 {
@@ -356,6 +356,10 @@
                 const toggle = document.createElement('i');
                 toggle.className = 'fas fa-chevron-right nav-toggle';
                 navLink.appendChild(toggle);
+            } else {
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-file-alt';
+                navLink.appendChild(icon);
             }
 
             const icon = document.createElement('i');
@@ -377,7 +381,7 @@
                     window.history.pushState({}, '', `?path=${link.path}`);
                     change_path();
                 });
-            } else {
+            } else if (hasChildren) {
                 navLink.addEventListener('click', () => {
                     const toggle = navLink.querySelector('.nav-toggle');
                     toggle.classList.toggle('open');

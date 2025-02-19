@@ -10,7 +10,7 @@
       "path": "help/index",
         "children": [
         {
-            "title": "Chat",
+            "title": "chat",
             "path": "help/chat"
       }
     ]
