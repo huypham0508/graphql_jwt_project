@@ -63,23 +63,37 @@
         }
 
         nav {
-            overflow-y: scroll;
-            overflow-x: hidden;
-            padding: 20px;
+            width: 250px; 
+            min-width: 250px;
+            height: 100vh;
+            background-color: #6BBF59; 
+            text-indent: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px 0;
-            border-right: 1px solid #7a7a7a;
+            gap: 0px;
+            color: white;
+            font-size: 16px;
+            font-family: "Arial", sans-serif;
         }
-
+        
         nav a {
             text-decoration: none;
+            color: white; 
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease-in-out;
         }
-
+        
+        nav a:hover {
+            background-color: #5CA946; 
+        }
+        
         nav a.active {
-            color: red;
+            background-color: #4A9239; 
             font-weight: bold;
         }
+        
 
         nav::-webkit-scrollbar {
             display: none;
@@ -90,7 +104,11 @@
             overflow-y: scroll;
             overflow-x: hidden;
             padding: 20px;
+            max-width: 900px; 
+            margin-left: 0; 
+            margin-right: auto; 
         }
+        
 
         section::-webkit-scrollbar {
             display: none;

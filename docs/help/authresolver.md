@@ -1,4 +1,6 @@
-# **AuthResolver - Quản lý xác thực người dùng trong GraphQL**
+# README
+<h1 align="center" style="font-size: 30px; color: green">AuthResolver - Quản lý xác thực người dùng trong GraphQL</h1>
+
 
 ## **1. Giới thiệu**
 `AuthResolver` là một `GraphQL Resolver` chịu trách nhiệm **xác thực người dùng**, **quản lý đăng nhập/đăng ký**, và **xử lý quên mật khẩu** trong hệ thống. Nó hoạt động bằng cách sử dụng **JSON Web Token (JWT)** để xác thực và bảo mật thông tin người dùng.
