@@ -1,45 +1,19 @@
 {
-    "default": "introduction",
-    "links": [
+  "default": "introduction",
+  "links": [
+    {
+        "path": "introduction",
+        "title": "Introduction"
+    },
+    {
+      "title": "Resolvers",
+        "children": [
         {
-            "path": "introduction",
-            "title": "Introduction"
-        },
-        {
-            "path": "help/hello",
-            "title": "Hell",
-            "children":[
-                {
-                    "path": "help/hello",
-                    "title": "a",
-                    "children":[
-                        {
-                            "path": "help/hello1",
-                            "title": "a1"
-                        },
-                        {
-                            "path": "help/hello1",
-                            "title": "a2"
-                        }
-                    ]
-                },
-                {
-                    "path": "help/hello",
-                    "title": "b"
-                }
-            ]
-        },
-        {
-            "path": "help/hello1",
-            "title": "Hello 1"
-        },
-        {
-            "path": "help/hello2",
-            "title": "Hello 2"
-        },
-        {
-            "path": "test1/hashid",
-            "title": "Hello 2"
-        }
+            "title": "Chat",
+            "path": "help/chat"
+      }
     ]
+    }
+  ]
 }
+
