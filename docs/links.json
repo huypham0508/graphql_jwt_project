@@ -6,11 +6,11 @@
         "title": "Introduction"
     },
     {
-      "title": "Models",
+      "title": "Resolvers",
         "children": [
         {
-            "title": "post",
-            "path": "help/post"
+            "title": "chat",
+            "path": "help/chat"
       }
     ]
     }
