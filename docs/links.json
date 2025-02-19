@@ -7,6 +7,7 @@
     },
     {
       "title": "Resolvers",
+      "path": "help/index",
         "children": [
         {
             "title": "Chat",
