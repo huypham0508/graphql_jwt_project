@@ -27,7 +27,7 @@ const main = async () => {
       console.log(
         `Graphql ready at http://localhost:${ConfigServer.PORT}${versionPath}`
       );
-      console.log(`RestfulAPI ready at http://localhost:${ConfigServer.PORT}/api/v1`);
+      console.log(`Restful-API ready at http://localhost:${ConfigServer.PORT}/api/v1`);
       console.log(`Docs ready at http://localhost:${ConfigServer.PORT}/docs`);
       console.groupEnd();
     });
