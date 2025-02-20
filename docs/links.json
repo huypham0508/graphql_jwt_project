@@ -14,6 +14,16 @@
           "path": "help/chat"
         }
       ]
+    },
+    {
+      "title": "Developer tutorials",
+      "path": "tutorials/index",
+      "children": [
+        {
+          "title": "Redis",
+          "path": "tutorials/redis"
+        }
+      ]
     }
   ]
 }
