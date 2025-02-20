@@ -2,19 +2,40 @@
   "default": "introduction",
   "links": [
     {
-        "path": "introduction",
-        "title": "Introduction"
+      "path": "introduction",
+      "title": "Introduction"
     },
     {
       "title": "Resolvers",
       "path": "help/index",
-        "children": [
+      "children": [
         {
-            "title": "chat",
-            "path": "help/chat"
-      }
-    ]
+          "title": "chat",
+          "path": "help/chat"
+        }
+      ]
+    },
+    {
+      "title": "Long-Polling",
+      "children": [
+        {
+          "title": "Long-Polling là gì?",
+          "path": "long-polling/noidung"
+        },
+        {
+          "title": "Các chức năng",
+          "children": [
+            {
+              "title": "Quản lý kết nối",
+              "path": "long-polling/ketnoi"
+            },
+            {
+              "title": "Controller Event",
+              "path": "long-polling/chucnang"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
-
