@@ -9,7 +9,6 @@ import {
 import { VerifyTokenAll } from "../../core/middleware/auth";
 import ConversationModel from "../../core/models/chat/conversation.model";
 import { MessageModel } from "../../core/models/chat/message.model";
-import SubscriptionModel from "../../core/models/chat/subscription.model";
 import { Context } from "../../core/types/Context";
 import { SendMessageInput } from "../../core/types/input/chat/MessageInput";
 import { GetConversationsResponse } from "../../core/types/response/chat/GetConversationsResponse";
@@ -20,12 +19,14 @@ import {
 import { SendNewMessageResponse } from "../../core/types/response/chat/SendNewMessageResponse";
 import { ResponseData } from "../../core/types/response/IMutationResponse";
 import {
+  findConversationById,
+  findConversationByParticipants,
   getConversationOrCreate,
   populateConversation,
-  updateLastMessage,
+  updateConversationMessage,
 } from "../actions/chat/conversation.actions";
-import { addMessage } from "../actions/chat/message.actions";
-import { createSubscriptions } from "../actions/chat/subscription.actions";
+import { addMessage, findMessageByConversationId } from "../actions/chat/message.actions";
+import { createSubscriptions, findSubscriptions } from "../actions/chat/subscription.actions";
 import { doEvents } from "../controllers/events.controller";
 
 @Resolver()
@@ -66,7 +67,7 @@ export class ChatResolver {
       });
 
       conversation.maxMessage = maxMessage;
-      await updateLastMessage(conversation.id, maxMessage.id);
+      await updateConversationMessage(conversation.id, maxMessage.id);
       await populateConversation(conversation);
 
       doEvents({
@@ -109,29 +110,19 @@ export class ChatResolver {
     @Ctx() { req, user }: Context
   ): Promise<MessageResponse> {
     try {
-      const conversation = await ConversationModel.findById(conversationId);
+      const conversation = await findConversationById(conversationId);
 
       if (!conversation) {
         throw new Error(req.t("conversation not found"));
       }
 
-      const subscriptions = await SubscriptionModel.find({
-        conversation: conversationId,
-        user: user.id,
-      })
-        .populate("user")
-        .populate("message");
+      const subscriptions = await findSubscriptions({conversationId: conversationId, userId: user.id});
 
       if (!subscriptions) {
         throw new Error(req.t("user is not subscribed"));
       }
 
-      const messages = await MessageModel.find({
-        conversation: conversationId,
-      })
-        .sort({ timestamp: 1 })
-        .populate({ path: "conversation", populate: { path: "participants" } })
-        .populate({ path: "sender", populate: { path: "role" } });
+      const messages = await findMessageByConversationId({conversationId});
 
       const subscriptionMap = new Map(
         subscriptions.map((sub) => [sub.message.id.toString(), sub])
@@ -161,19 +152,11 @@ export class ChatResolver {
     @Ctx() { req, user }: Context
   ): Promise<GetConversationsResponse> {
     try {
-      const conversations = await ConversationModel.find({
-        participants: user.id,
-      })
-        .populate({ path: "participants", populate: { path: "role" } })
-        .populate({ path: "maxMessage", populate: { path: "sender" } });
-      console.log({ conversations });
+      const conversations = await findConversationByParticipants(user.id);
 
-      const subscriptions = await SubscriptionModel.find({
-        user: user.id,
-      })
-        .populate("user")
-        .populate("message");
-
+      const subscriptions = await findSubscriptions({
+        userId: user.id,
+      });
       const filteredConversations = conversations.map((conversation) => {
         let name: string = "";
         conversation.participants.forEach((participant: any, index: number) => {
@@ -191,7 +174,6 @@ export class ChatResolver {
         const seen = new Set();
         const filteredParticipants = conversation.participants.filter(
           (item: any) => {
-            console.log({ item });
             if (seen.has(item.id.toString())) return false;
             seen.add(item.id.toString());
             return true;
@@ -206,8 +188,6 @@ export class ChatResolver {
         } else {
           name = conversation.name;
         }
-
-        console.log({ subscriptions });
 
         return {
           id: conversation._id.toString(),

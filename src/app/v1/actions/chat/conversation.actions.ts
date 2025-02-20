@@ -25,7 +25,37 @@ const getConversationOrCreate = async (
 const saveConversation = async (
   conversation: HydratedDocument<IConversation>
 ): Promise<void> => {
-  await conversation.save();
+  try {
+    await conversation.save();
+  } catch (error) {
+    throw new Error(`saveConversation - error: ${error}`);
+  }
+};
+
+const findConversationById = async (
+  conversationId: string
+): Promise<HydratedDocument<IConversation> | null> => {
+  try {
+    return await ConversationModel.findById(conversationId);
+  } catch (error) {
+    throw new Error(`findConversationById - error: ${error}`);
+  }
+};
+
+const findConversationByParticipants = async (
+  participants: any
+): Promise<HydratedDocument<IConversation>[]> => {
+  try {
+    const conversations = await ConversationModel.find({
+      participants: participants
+    })
+      .populate({ path: "participants", populate: { path: "role" } })
+      .populate({ path: "maxMessage", populate: { path: "sender" } });
+
+    return conversations;
+  } catch (error) {
+    throw new Error(`findConversationById - error: ${error}`);
+  }
 };
 
 const populateConversation = async (
@@ -53,7 +83,7 @@ const populateConversation = async (
   }
 };
 
-const updateLastMessage = async (
+const updateConversationMessage = async (
   conversationId: string,
   messageId: string
 ): Promise<IConversation | null> => {
@@ -64,13 +94,15 @@ const updateLastMessage = async (
       { new: true }
     );
   } catch (error) {
-    throw new Error(`updateLastMessage - error: ${error}`);
+    throw new Error(`updateConversationMessage - error: ${error}`);
   }
 };
 
 export {
+  findConversationById,
+  findConversationByParticipants,
   getConversationOrCreate,
   saveConversation,
   populateConversation,
-  updateLastMessage,
+  updateConversationMessage,
 };

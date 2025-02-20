@@ -21,6 +21,22 @@ const addMessage = async ({
   }
 };
 
+const findMessageByConversationId = async ({
+  conversationId
+}: {conversationId: string}): Promise<HydratedDocument<IMessage>[]> => {
+  try {
+    const messages = await MessageModel.find({
+      conversation: conversationId,
+    })
+      .sort({ timestamp: 1 })
+      .populate({ path: "conversation", populate: { path: "participants" } })
+      .populate({ path: "sender", populate: { path: "role" } });
+    return messages;
+  } catch (error) {
+    throw new Error(`addMessage - error: ${error}`);
+  }
+};
 
 
-export { addMessage };
+
+export { addMessage, findMessageByConversationId };
