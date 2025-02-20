@@ -4,7 +4,7 @@ Tệp events.controller.ts này chứa các handle sự kiện, chịu trách nh
 
 ## Import các module và kiểu dữ liệu
 
-Import các module và kiểu dữ liệu
+Import các module và các kiểu dữ liệu
 ```
 import { Response } from "express";
 import { v4 as uuidv4 } from "uuid";
