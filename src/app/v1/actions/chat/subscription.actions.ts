@@ -4,16 +4,6 @@ import SubscriptionModel, {
   ISubscription,
 } from "../../../core/models/chat/subscription.model";
 
-/**
- * Tracks message delivery status for users in a chat room.
- *
- * This function is used to record the delivery status of a message for each involved user.
- *
- * @param {string} messageId - The message ID.
- * @param {string} conversationId - The conversation ID.
- * @param {string} senderId - The sender's ID.
- * @param {string[]} recipientIds - An array of recipient IDs.
- */
 const createSubscriptions = async (params: {
   messageId: string;
   conversationId: string;
@@ -38,7 +28,7 @@ const createSubscriptions = async (params: {
   }
 };
 
-const findSubscriptions = async ({
+const getSubscriptions = async ({
   conversationId,
   userId,
 }: {
@@ -53,8 +43,8 @@ const findSubscriptions = async ({
       .populate("user")
       .populate("message");
   } catch (error) {
-    throw new Error(`findConversationById - error: ${error}`);
+    throw new Error(`getSubscriptions - error: ${error}`);
   }
 };
 
-export { createSubscriptions, findSubscriptions };
+export { createSubscriptions, getSubscriptions };

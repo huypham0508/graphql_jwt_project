@@ -32,17 +32,17 @@ const saveConversation = async (
   }
 };
 
-const findConversationById = async (
+const getConversationById = async (
   conversationId: string
 ): Promise<HydratedDocument<IConversation> | null> => {
   try {
     return await ConversationModel.findById(conversationId);
   } catch (error) {
-    throw new Error(`findConversationById - error: ${error}`);
+    throw new Error(`getConversationById - error: ${error}`);
   }
 };
 
-const findConversationByParticipants = async (
+const getConversationByParticipants = async (
   participants: any
 ): Promise<HydratedDocument<IConversation>[]> => {
   try {
@@ -54,7 +54,7 @@ const findConversationByParticipants = async (
 
     return conversations;
   } catch (error) {
-    throw new Error(`findConversationById - error: ${error}`);
+    throw new Error(`getConversationByParticipants - error: ${error}`);
   }
 };
 
@@ -99,8 +99,8 @@ const updateConversationMessage = async (
 };
 
 export {
-  findConversationById,
-  findConversationByParticipants,
+  getConversationById,
+  getConversationByParticipants,
   getConversationOrCreate,
   saveConversation,
   populateConversation,

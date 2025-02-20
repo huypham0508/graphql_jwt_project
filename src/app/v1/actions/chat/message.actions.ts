@@ -21,7 +21,7 @@ const addMessage = async ({
   }
 };
 
-const findMessageByConversationId = async ({
+const getMessageByConversationId = async ({
   conversationId
 }: {conversationId: string}): Promise<HydratedDocument<IMessage>[]> => {
   try {
@@ -33,10 +33,10 @@ const findMessageByConversationId = async ({
       .populate({ path: "sender", populate: { path: "role" } });
     return messages;
   } catch (error) {
-    throw new Error(`addMessage - error: ${error}`);
+    throw new Error(`getMessageByConversationId - error: ${error}`);
   }
 };
 
 
 
-export { addMessage, findMessageByConversationId };
+export { addMessage, getMessageByConversationId };

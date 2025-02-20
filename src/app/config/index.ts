@@ -17,6 +17,7 @@ export class ConfigServer {
   // rate limited settings
   public static WINDOW_MS: number = 15 * 60 * 1000;
   public static MAX_REQUESTS: number = 75;
+  public static DEFAULT_ROLE: string = "member";
 }
 export class ConfigJWT {
   public static create_token_type: string = "createToken";
