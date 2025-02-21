@@ -12,6 +12,26 @@
         {
           "title": "chat",
           "path": "help/chat"
+        },
+        {
+          "title": "auth",
+          "path": "help/auth"
+        },
+        {
+          "title": "emit_events",
+          "path": "help/emit_events"
+        },
+        {
+          "title": "index",
+          "path": "help/index"
+        },
+        {
+          "title": "post",
+          "path": "help/post"
+        },
+        {
+          "title": "system",
+          "path": "help/system"
         }
       ]
     },
