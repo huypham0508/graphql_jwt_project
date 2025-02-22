@@ -1,10 +1,101 @@
 ### Các thư viện cần thiết
-- type-graphql: Xây dựng GraphQL resolver.
-- FriendModel, UserModel: Model dữ liệu người dùng và bạn bè.
-- VerifyTokenAll: Middleware xác thực người dùng.
-- Context: Chứa thông tin người dùng hiện tại.
-- FriendStatus: Enum trạng thái quan hệ bạn bè.
-- FindFriendsResponse, GetFriendsResponse, RelationshipResponse: Các kiểu phản hồi API.
+
+- import {Arg,Ctx,Mutation,Query,Resolver,UseMiddleware} from "type-graphql";
+- import { FriendStatus } from "../../core/enum/friend.enum";
+- import { VerifyTokenAll } from "../../core/middleware/auth";
+- import { FriendModel, IFriend } from "../../core/models/friend/friend.model";
+- import UserModel, { IUser } from "../../core/models/user/user.model";
+- import { Context } from "../../core/types/Context";
+- import { FindFriendsResponse, FindUserResponse} from "../../core/types/response/relationship/FindFriendsResponse";
+- import { GetFriendsResponse } from "../../core/types/response/relationship/GetFriendResponse";
+- import { RelationshipResponse } from "../../core/types/response/relationship/RelationshipResponse";
+
+### Middleware
+- Mô tả: Xác thực người dùng trước khi thực hiện các hành động liên quan đến hệ thống.
+- Cơ chế hoạt động:
+- Kiểm tra token của người dùng.
+    - Nếu token hợp lệ, cho phép tiếp tục.
+    - Nếu không, trả về lỗi và dừng truy vấn/mutation.
+
+### allResolvers()
+- Mô tả: Truy vấn danh sách tất cả các resolver có trong hệ thống (Query, Mutation, Subscription).
+- Biến: Không có biến truyền vào.
+- Kết quả trả về:
+    - Code 200: Thành công.
+    - Success: Trạng thái thành công (true/false).
+    - Data: Mảng danh sách resolver, gồm:
+        - name: Tên method.
+        - resolver: Tên resolver.
+        - type: Loại resolver (Query, Mutation, Subscription).
+    ```
+        query {
+            allResolvers {
+                code
+                success
+                data {
+                    name
+                    resolver
+                    type
+                }
+            }
+        }
+    ```
+
+### roles()
+- Mô tả: Truy vấn danh sách tất cả các vai trò (roles) trong hệ thống.
+- Biến: Không có biến truyền vào.
+- Kết quả trả về:
+    - Code 200: Thành công.
+    - Code 200 (nếu danh sách rỗng): "roles is empty".
+    - Success: Trạng thái thành công (true/false).
+    - Message: Thông báo phản hồi.
+    - Data: Mảng danh sách vai trò, bao gồm:
+        - id: ID của vai trò.
+        - name: Tên vai trò.
+        - permissions: Danh sách quyền hạn của vai trò.
+    ```
+    query {
+        roles {
+            code
+            success
+            message
+            data {
+                id
+                name
+                permissions
+            }
+        }
+    }
+    ```
+
+### addPermissionToRole()
+- Mô tả: Thêm quyền (permission) vào một vai trò (role).
+- Biến:
+    - roleId: ID của vai trò cần thêm quyền.
+    - permission: Tên quyền cần thêm.
+- Context:
+    - Kiểm tra xem vai trò có tồn tại không trước khi thêm quyền.
+    - Nếu vai trò không tồn tại, trả về lỗi 404.
+    - Nếu quyền đã tồn tại trong vai trò, trả về lỗi 400.
+- Kết quả trả về:
+    - Code 200: Thành công.
+    - Code 404: Không tìm thấy vai trò.
+    - Code 400: Quyền đã tồn tại.
+    - Code 500: Lỗi hệ thống.
+    - Success: Trạng thái thành công (true/false).
+    - Message: Thông báo phản hồi.
+    ```
+    mutation {
+        addPermissionToRole(roleId: "654321", permission: "MANAGE_USERS") {
+            code
+            success
+            message
+        }
+    }
+    ```
+
+
+
 
 ### Middleware
 - Mô tả: Xác thực người dùng trước khi thực hiện các hành động liên quan đến reaction.
