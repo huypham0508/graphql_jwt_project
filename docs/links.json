@@ -1,0 +1,24 @@
+{
+  "default": "introduction",
+  "links": [
+    {
+        "path": "introduction",
+        "title": "Introduction"
+    },
+    {
+      "title": "Resolvers",
+      "path": "help/index",
+        "children": [
+        {
+            "title": "chat",
+            "path": "help/chat"
+      },
+      {
+        "title": "auth",
+        "path": "help/auth"
+  }
+    ]
+    }
+  ]
+}
+
