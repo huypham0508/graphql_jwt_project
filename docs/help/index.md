@@ -1,44 +1,68 @@
-# Resolvers
+# Tài liệu: Cấu hình Schema GraphQL với Type-GraphQL
 
-## Giới thiệu
-Project sử dụng: Node.js 13 (Typescript), GraphQL, MongooseDB, Redis 
-Đây là hướng dẫn cách cài đặt source code cho developer.
-## Cài đặt
-### Hướng dẫn cài đặt
+## Tổng quan
+Module này định nghĩa và xây dựng một schema GraphQL bằng cách sử dụng gói `type-graphql`. Nó tích hợp nhiều resolver để xử lý các phần khác nhau của logic nghiệp vụ ứng dụng và áp dụng một middleware ủy quyền toàn cục.
 
-1. Clone source code
+## Các phụ thuộc
+- `type-graphql`: Được sử dụng để định nghĩa và xây dựng schema GraphQL.
+- Các resolver tùy chỉnh:
+  - `AuthResolver`: Xử lý các hoạt động liên quan đến xác thực.
+  - `ChatResolver`: Quản lý chức năng chat.
+  - `EmitEventResolver`: Xử lý phát sự kiện theo thời gian thực.
+  - `PostResolver`: Quản lý bài viết của người dùng.
+  - `ReactionResolver`: Xử lý các phản ứng đối với bài viết.
+  - `RelationshipResolver`: Quản lý mối quan hệ giữa người dùng (ví dụ: bạn bè, theo dõi).
+  - `SystemResolver`: Quản lý các truy vấn và thay đổi liên quan đến hệ thống.
+- `AuthorizationMiddleware`: Một middleware toàn cục được áp dụng cho tất cả các resolver để kiểm soát truy cập.
 
+## Các chức năng công khai
+Một mảng có tên `publicFunctions` được định nghĩa, liệt kê các resolver có thể truy cập công khai mà không cần xác thực. Hiện tại, chỉ có `AuthResolver` được đặt là công khai.
+
+## Cấu hình Schema
+Hàm `buildSchema` từ `type-graphql` được sử dụng để xây dựng schema GraphQL với các tùy chọn sau:
+- `validate: false`: Tắt kiểm tra hợp lệ tự động của schema.
+- `resolvers`: Liệt kê tất cả các resolver định nghĩa API GraphQL.
+- `globalMiddlewares`: Áp dụng `AuthorizationMiddleware` để thực thi xác thực và ủy quyền trên toàn bộ schema.
+
+## Phân tích mã nguồn
+```typescript
+import { buildSchema } from "type-graphql";
+
+import { AuthorizationMiddleware } from "../../core/middleware/auth";
+import { AuthResolver } from "./auth.resolver";
+import { ChatResolver } from "./chat.resolver";
+import { EmitEventResolver } from "./emit_events.resolver";
+import { PostResolver } from "./post.resolver";
+import { ReactionResolver } from "./reaction.resolver";
+import { RelationshipResolver } from "./relationship.resolver";
+import { SystemResolver } from "./system.resolver";
+
+export const publicFunctions = ["AuthResolver"];
+
+export default buildSchema({
+  validate: false,
+  resolvers: [
+    SystemResolver,
+    EmitEventResolver,
+    AuthResolver,
+    PostResolver,
+    ReactionResolver,
+    RelationshipResolver,
+    ChatResolver,
+  ],
+  globalMiddlewares: [AuthorizationMiddleware],
+});
 ```
-git clone https://github.com/huypham0508/graphql_jwt_project.git
-cd graphql_jwt_project
-```
 
-2. Chạy lệnh bash scripts/setup/started.sh để kéo các package cần thiết để start
+## Những điểm chính
+- Module này xây dựng một schema GraphQL bằng `type-graphql`.
+- Schema bao gồm nhiều resolver chịu trách nhiệm cho các chức năng khác nhau.
+- `AuthorizationMiddleware` được áp dụng toàn cục để thực thi xác thực.
+- `AuthResolver` có thể truy cập công khai, trong khi các resolver khác có thể yêu cầu xác thực.
 
-```shell
-bash scripts/setup/started.sh
-```
+## Cách sử dụng
+Cấu hình schema này nên được nhập và sử dụng trong thiết lập máy chủ GraphQL để hiển thị các resolver đã định nghĩa và thực thi middleware xác thực.
 
-3. Sau đó chạy npm start
+---
+Tài liệu này cung cấp cái nhìn tổng quan về mục đích, cấu trúc và chức năng của mã nguồn, giúp các nhà phát triển dễ dàng hiểu và duy trì thiết lập schema GraphQL.
 
-```shell
-npm run dev
-```
-
-### Mô tả các công nghệ sử dụng trong dự án
-- Typescript: Thay thế cho Javascript, giúp kiểm tra lỗi trước khi chạy mã và cung cấp tính năng mới như kiểu dữ liệu tĩnh và các tính năng ECMAScript mới
-- nodemon: Nodemon là một công cụ giúp theo dõi các thay đổi trong mã nguồn và tự động khởi động lại máy chủ Node.js mỗi khi có thay đổi, giúp quá trình phát triển trở nên linh hoạt và nhanh chóng.
-- graphql: GraphQL là một ngôn ngữ truy vấn dành cho API và một runtime cho thực thi các truy vấn với dữ liệu có tự mô tả. Nó cho phép các khách hàng yêu cầu chỉ các dữ liệu mà họ cần và không gì nhiều hơn.
-- mongoose: Mongoose là một thư viện ODM (Object Data Modeling) cho Node.js và MongoDB. Nó cho phép bạn định nghĩa các mô hình dữ liệu và tương tác với cơ sở dữ liệu MongoDB
-- apollo-server: Apollo Server là một thư viện mã nguồn mở được sử dụng để xây dựng các GraphQL server trong các ứng dụng Node.js. Nó cung cấp các tính năng như truy vấn, mutation, và subscription, cũng như các công cụ để phân tích và thực thi truy vấn GraphQL.
-
-### Hướng dẫn cài đặt các dependencies
-- [Cài đặt Redis cho Windows](redis.md)
-
-## Documents chi tiết của tài nguyên
-- [Redis](https://redis.io/docs/latest/operate/)
-- [Typescript](https://www.typescriptlang.org/docs/)
-- [Nodemon](https://github.com/remy/nodemon#nodemon)
-- [GraphQL](https://graphql.org/learn/)
-- [Mongoose](https://mongoosejs.com/docs/api/document.html)
-- [Apollo Server](https://www.apollographql.com/docs/apollo-server)
