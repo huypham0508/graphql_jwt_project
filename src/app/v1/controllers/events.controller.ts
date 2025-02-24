@@ -49,7 +49,7 @@ export const handleEvents = async(req: CustomRequest, res: Response): Promise<vo
     if (!(await connectionManager.hasSession(queue_id))) {
       return res.status(404).json({
         success: false,
-        message: "queue_id not found session",
+        message: "queue_id not found in session",
       });
     }
 

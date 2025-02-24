@@ -2,23 +2,28 @@
   "default": "introduction",
   "links": [
     {
-        "path": "introduction",
-        "title": "Introduction"
+      "path": "introduction",
+      "title": "Introduction"
     },
     {
       "title": "Resolvers",
       "path": "help/index",
-        "children": [
+      "children": [
         {
-            "title": "chat",
-            "path": "help/chat"
-      },
-      {
-        "title": "auth",
-        "path": "help/auth"
-  }
-    ]
+          "title": "chat",
+          "path": "help/chat"
+        }
+      ]
+    },
+    {
+      "title": "Developer tutorials",
+      "path": "tutorials/index",
+      "children": [
+        {
+          "title": "Redis",
+          "path": "tutorials/redis"
+        }
+      ]
     }
   ]
 }
-
