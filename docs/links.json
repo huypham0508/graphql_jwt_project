@@ -2,10 +2,6 @@
   "default": "introduction",
   "links": [
     {
-      "path": "introduction",
-      "title": "Introduction"
-    },
-    {
       "title": "Resolvers",
       "path": "help/index",
       "children": [
@@ -19,19 +15,37 @@
       "title": "Long-Polling",
       "children": [
         {
-          "title": "Long-Polling là gì?",
-          "path": "long-polling/noidung"
+          "title": "What is long polling?",
+          "path": "long-polling/Introduction"
         },
         {
-          "title": "Các chức năng",
+          "title": "Functions",
           "children": [
             {
-              "title": "Quản lý kết nối",
-              "path": "long-polling/ketnoi"
+              "title": "Connection",
+              "path": "long-polling/connection"
             },
             {
               "title": "Controller Event",
-              "path": "long-polling/chucnang"
+              "path": "long-polling/controller"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Real-Time",
+      "children": [
+        {
+          "title": "What is Realtime?",
+          "path": "realtime/introduction"
+        },
+        {
+          "title": "Functions",
+          "children": [
+            {
+              "title": "Chat Resolver",
+              "path": "realtime/chatResolver"
             }
           ]
         }
