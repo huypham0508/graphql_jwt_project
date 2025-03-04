@@ -1,6 +1,6 @@
 import { HydratedDocument } from "mongoose";
-import { ConfigServer } from "src/app/config";
-import RoleModel, { IRole } from "src/app/core/models/role/role.model";
+import { ConfigServer } from "../../../config";
+import RoleModel, { IRole } from "../../../core/models/role/role.model";
 
 const getDefaultRole = async (): Promise<HydratedDocument<IRole> | null> => {
   try {

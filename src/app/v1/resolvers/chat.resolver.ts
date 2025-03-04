@@ -19,14 +19,14 @@ import {
 import { SendNewMessageResponse } from "../../core/types/response/chat/SendNewMessageResponse";
 import { ResponseData } from "../../core/types/response/IMutationResponse";
 import {
-  findConversationById,
-  findConversationByParticipants,
+  getConversationById,
+  getConversationByParticipants,
   getConversationOrCreate,
   populateConversation,
   updateConversationMessage,
 } from "../actions/chat/conversation.actions";
-import { addMessage, findMessageByConversationId } from "../actions/chat/message.actions";
-import { createSubscriptions, findSubscriptions } from "../actions/chat/subscription.actions";
+import { addMessage, getMessageByConversationId } from "../actions/chat/message.actions";
+import { createSubscriptions, getSubscriptions } from "../actions/chat/subscription.actions";
 import { doEvents } from "../controllers/events.controller";
 
 @Resolver()
@@ -110,19 +110,19 @@ export class ChatResolver {
     @Ctx() { req, user }: Context
   ): Promise<MessageResponse> {
     try {
-      const conversation = await findConversationById(conversationId);
+      const conversation = await getConversationById(conversationId);
 
       if (!conversation) {
         throw new Error(req.t("conversation not found"));
       }
 
-      const subscriptions = await findSubscriptions({conversationId: conversationId, userId: user.id});
+      const subscriptions = await getSubscriptions({conversationId: conversationId, userId: user.id});
 
       if (!subscriptions) {
         throw new Error(req.t("user is not subscribed"));
       }
 
-      const messages = await findMessageByConversationId({conversationId});
+      const messages = await getMessageByConversationId({conversationId});
 
       const subscriptionMap = new Map(
         subscriptions.map((sub) => [sub.message.id.toString(), sub])
@@ -152,9 +152,9 @@ export class ChatResolver {
     @Ctx() { req, user }: Context
   ): Promise<GetConversationsResponse> {
     try {
-      const conversations = await findConversationByParticipants(user.id);
+      const conversations = await getConversationByParticipants(user.id);
 
-      const subscriptions = await findSubscriptions({
+      const subscriptions = await getSubscriptions({
         userId: user.id,
       });
       const filteredConversations = conversations.map((conversation) => {

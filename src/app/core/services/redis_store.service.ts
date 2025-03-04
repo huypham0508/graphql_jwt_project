@@ -8,7 +8,7 @@ class RedisStorage {
     private connectionTimeout: NodeJS.Timeout | undefined;
 
     private constructor() {
-        this.storage = createClient(Redis.OPTIONS_DEV);
+        this.storage = createClient(Redis.REDIS_OPTIONS);
         this.handleEvents();
     }
 

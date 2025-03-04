@@ -8,7 +8,7 @@
     "server": "nodemon ./dist/server.js",
     "start": "node ./dist/server.js",
     "auto-build": "sh build-production.sh",
-    "build": "rm -rf dist && tsc && mkdir dist/public && cp -r ./src/public/* ./dist/public",
+    "build": "rm -rf dist && tsc && mkdir dist/public && cp -r ./public/* ./dist/public",
     "create-version": "node scripts/createNewVersion.js"
   },
   "author": "",

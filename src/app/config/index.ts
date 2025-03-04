@@ -6,8 +6,8 @@ dotenv.config();
 const isProduction = process.env.NODE_ENV === "production";
 
 export class ConfigMongo {
-  private static URI_PRO: string = "mongodb+srv://admin2:oORArVKaZaSxgjfb@cluster0.37vmswz.mongodb.net/test/?retryWrites=true&w=majority";
-  private static URI_DEV: string = "mongodb://localhost:27017/database_graph_ql";
+  private static URI_PRO: string = process.env.DB_URI_PRODUCTION ?? "";
+  private static URI_DEV: string = process.env.DB_URI_DEV ?? "";
   public static URI_DATABASE: any = isProduction ? this.URI_PRO : this.URI_DEV;
 }
 
@@ -56,13 +56,12 @@ export class Redis {
     "ERROR": "error",
   };
   public static REDIS_CONNECT_TIMEOUT = 30000;
-  public static PORT = 19865;
   public static OPTIONS_PRO: RedisClientOptions = {
-    username: 'admin',
-    password: 'Huy@11072002',
+    username: process.env.REDIS_CLOUD_USERNAME,
+    password: process.env.REDIS_CLOUD_PASSWORD,
     socket: {
-        host: 'redis-19865.c295.ap-southeast-1-1.ec2.redns.redis-cloud.com',
-        port: 19865
+        host: process.env.REDIS_CLOUD_HOST,
+        port: Number(process.env.REDIS_CLOUD_PORT ?? "0"),
     }
   };
 
@@ -72,4 +71,6 @@ export class Redis {
       port: 6379,
     }
   };
+
+  public static REDIS_OPTIONS: RedisClientOptions = isProduction ? this.OPTIONS_PRO : this.OPTIONS_DEV;
 }

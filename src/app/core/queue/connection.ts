@@ -1,5 +1,5 @@
-import { Event } from "src/app/core/types/system/Events";
-import {RedisRepository, redisRepository as instanceRedisRepository} from "./redis_repository";
+import { Event } from "../../core/types/system/Events";
+import { RedisRepository, redisRepository as instanceRedisRepository} from "./redis_repository";
 import { ConnectionType } from "../types/system/Connection";
 
 class ConnectionManager {

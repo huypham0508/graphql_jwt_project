@@ -2,7 +2,7 @@ import { RedisClientType } from "redis";
 
 import redis from "../services/redis_store.service";
 
-import { Event, RedisSession } from "src/app/core/types/system/Events";
+import { Event, RedisSession } from "../../core/types/system/Events";
 
 class RedisRepository {
     private TIME_SESSION = 1800;
