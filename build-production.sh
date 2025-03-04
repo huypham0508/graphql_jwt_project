@@ -1,3 +1,2 @@
-cp -r dist/public/uploads/* src/public/uploads/
-
+cp -r src/public/uploads/* dist/public/uploads/
 npm run build

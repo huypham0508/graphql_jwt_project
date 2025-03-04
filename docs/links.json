@@ -7,13 +7,7 @@
     },
     {
       "title": "Auth",
-      "path": "help/auth",
-      "children": [
-        {
-          "title": "auth",
-          "path": "help/auth"
-        }
-      ]
+      "path": "help/auth"
     },
     {
       "title": "Resolvers",
