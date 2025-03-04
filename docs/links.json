@@ -6,12 +6,32 @@
       "title": "Introduction"
     },
     {
+      "title": "Auth",
+      "path": "help/auth",
+      "children": [
+        {
+          "title": "auth",
+          "path": "help/auth"
+        }
+      ]
+    },
+    {
       "title": "Resolvers",
       "path": "help/index",
       "children": [
         {
           "title": "chat",
           "path": "help/chat"
+        }
+      ]
+    },
+    {
+      "title": "Developer tutorials",
+      "path": "tutorials/index",
+      "children": [
+        {
+          "title": "Redis",
+          "path": "tutorials/redis"
         }
       ]
     }
