@@ -1,8 +1,8 @@
 import { Schema, model } from "mongoose";
 import { Field, ID, ObjectType } from "type-graphql";
+import ModelName from "../../../core/constants/model_name";
 import { IUser } from "../user/user.model";
 import { IMessage } from "./message.model";
-import ModelName from "../../../core/constants/model_name";
 
 @ObjectType()
 export class IConversation {
@@ -31,18 +31,6 @@ const conversationSchema = new Schema<IConversation>({
   ],
 });
 
-export const getConversationOrCreate : any = async (participants: string[]) => {
-  let conversation = await ConversationModel.findOne({
-    participants: { $all: participants },
-  });
-    if (!conversation) {
-      conversation = new ConversationModel({
-        participants,
-      });
-      await conversation.save();
-    }
-    return conversation;
-};
 
 const ConversationModel = model(ModelName.CONVERSATION, conversationSchema);
 export default ConversationModel;

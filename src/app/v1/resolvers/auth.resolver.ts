@@ -1,7 +1,7 @@
 import { ApolloError } from "apollo-server-core";
 import { Arg, Ctx, ID, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
-import { Bcrypt } from "../../core/bcrypt/index";
 import { ConfigJWT, Otp, Role } from "../../config";
+import { Bcrypt } from "../../core/bcrypt/index";
 import {
   AuthMiddleware,
   VerifyTokenAll,
@@ -11,7 +11,6 @@ import User, { IUser } from "../../core/models/user/user.model";
 
 import generateOTP from "../../core/utils/generate_otp";
 
-import RoleModel from "../../core/models/role/role.model";
 import { Context } from "../../core/types/Context";
 import { LoginInput } from "../../core/types/input/user/LoginInput";
 import { RegisterInput } from "../../core/types/input/user/RegisterInput";
@@ -20,6 +19,8 @@ import { ForgotPasswordResponse } from "../../core/types/response/auth/ForgotPas
 import { UserMutationResponse } from "../../core/types/response/user/UserMutationResponse";
 import { TokenPayLoad } from "../../core/types/TokenPayload";
 import sendEmail from "../../core/utils/send_email";
+import { getDefaultRole } from "../actions/role/role.actions";
+import { addUser, getOneUser, updateOneUser } from "../actions/user/user.actions";
 
 @Resolver()
 export class AuthResolver {
@@ -53,7 +54,7 @@ export class AuthResolver {
 
     const { email, userName, password, avatar } = registerInput;
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await getOneUser({email});
     if (existingUser) {
       return {
         code: 400,
@@ -62,19 +63,20 @@ export class AuthResolver {
       };
     }
 
-    const defaultRole = await RoleModel.findOne({ name: "member" });
+    const defaultRole = await getDefaultRole();
+    if (!defaultRole) {
+      throw new Error("default role not found")
+    }
 
     const hashedPassword = await Bcrypt.hashPassword(password);
-    const newUser = new User({
-      email,
-      userName,
-      password: hashedPassword,
-      avatar: avatar,
-      otp: undefined,
-      otpExpirationTime: undefined,
-      role: defaultRole,
-    });
-    await newUser.save();
+    const newUser = await addUser({
+        email,
+        userName,
+        password: hashedPassword,
+        avatar: avatar,
+        role: defaultRole,
+      }
+    );
 
     return {
       code: 200,
@@ -92,9 +94,7 @@ export class AuthResolver {
     @Ctx() { req, res }: Context
   ): Promise<UserMutationResponse> {
     console.log("login is working...", email);
-    const checkAccount = await User.findOne({
-      email,
-    });
+    const checkAccount = await getOneUser({email});
 
     if (!checkAccount) {
       return {
@@ -147,7 +147,7 @@ export class AuthResolver {
     @Arg("email") email: string,
     @Ctx() { req }: Context
   ): Promise<ForgotPasswordResponse> {
-    const user = await User.findOne({ email });
+    const user = await getOneUser({email});
     if (!user) {
       return {
         code: 400,
@@ -167,11 +167,10 @@ export class AuthResolver {
     sendEmail(mailOptions);
     const expirationTime = Date.now() + Otp.EXPIRATION_TIME;
 
-    await User.updateOne(
-      { _id: user.id, email: email },
+    await updateOneUser(
+      { _id: user.id, email: email }, 
       { otp: otp, otpExpirationTime: expirationTime }
-    );
-
+    )
 
     return {
       code: 200,
@@ -186,7 +185,7 @@ export class AuthResolver {
     @Arg("otp") otp: string,
     @Ctx() { req }: Context
   ): Promise<ForgotPasswordResponse> {
-    const user = await User.findOne({ email });
+    const user = await getOneUser({email});
 
     if (!user) {
       return {
@@ -212,9 +211,9 @@ export class AuthResolver {
       };
     }
 
-    await User.updateOne(
+    await updateOneUser(
       { _id: user.id, email: email },
-      { otp: null, otpExpirationTime: null }
+      { otp: undefined, otpExpirationTime: undefined }
     );
 
     const tokenPayLoad: TokenPayLoad = {
@@ -250,7 +249,7 @@ export class AuthResolver {
     try {
       const hashedPassword = await Bcrypt.hashPassword(newPassword);
 
-      await User.updateOne(
+      await updateOneUser(
         { _id: user.id, email: payloadVerify.email },
         {
           password: hashedPassword,
@@ -275,9 +274,7 @@ export class AuthResolver {
     @Arg("id", (_type) => ID) id: any,
     @Ctx() { req, res }: Context
   ): Promise<UserMutationResponse> {
-    const existingUser = await User.findOne({
-      _id: id,
-    });
+    const existingUser = await getOneUser({id: id});;
     if (!existingUser) {
       return {
         code: 401,
@@ -285,8 +282,8 @@ export class AuthResolver {
         message: req.t("User not found!"),
       };
     }
-    existingUser.token = "";
-    await existingUser.save();
+    // existingUser.token = "";
+    // await existingUser.save();
     //clear cookie
     res.clearCookie(ConfigJWT.REFRESH_TOKEN_COOKIE_NAME, {
       httpOnly: true,
